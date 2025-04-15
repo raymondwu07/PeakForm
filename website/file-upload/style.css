@@ -1,0 +1,111 @@
+body {
+    margin: 0;
+    min-height: 100vh; 
+    background-color: #0D1227;
+    background-attachment: fixed; 
+    color:white;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.03rem;
+    justify-content: center;
+}
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 1rem 2rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-color: rgba(10, 15, 31, 0.5);
+    z-index: 1000;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 1rem; 
+
+}
+
+#header-text-container {
+    display: flex;
+    flex-direction: column;  
+    gap: 0.2rem;         
+
+  
+}
+#header-text-container p{
+    color: #B9C3FF;
+    margin: 0;
+}
+  
+#headertext, #header  {
+    margin: 0;  
+    color: white;
+}
+  
+#header img {
+    height: 40px;
+    width: auto;
+}
+
+#analyseBtn{
+    background-color: #9259DD;
+    color: white;
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    animation: pulse 2s infinite;
+    border: none;
+    height: 40px;
+    width: 90px;
+}
+
+#goBackBtn{
+    background: none;
+    color: #B9C3FF;
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    border: #B9C3FF solid 1px;
+    height: 40px;
+    width: 90px;
+    border-radius: 25px;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 2px rgba(255,255,255,0.5); }
+    50% { box-shadow: 0 0 13px rgba(255,255,255,0.8); }
+    100% { box-shadow: 0 0 2px rgba(255,255,255,0.5); }
+}
+
+#cardSection{
+    background-color: #161B33;
+    border-radius: 15px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 500px;
+    margin: 9rem auto 2rem; 
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: none;
+    text-align: center;
+    color: white;
+}
+
+#submitDiv{
+    padding-bottom: 10px;
+}
+
+#footer{
+    background-color: #2b6777;
+    color: #c8d8e4;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+
+button{
+    border-radius: 10px;
+}
+
+button:hover {
+    cursor: pointer;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(185, 195, 255, 0.3);
+}

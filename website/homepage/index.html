@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PeakForm AI</title>
+    <link rel="icon" type="image/x-icon" href="images/webfavicon2.ico" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div id="header">
+      <img src="images/icon.png" />
+      <div id="header-text-container">
+        <h1 id="headertext">PeakForm AI</h1>
+        <p>AI Fitness Trainer & Health Logger</p>
+      </div>
+
+      <div id="buttons1">
+        <a href="../loginpage/index.html">
+          <div id="loginWrapper">
+            <button id="toLoginBtn">Log In</button><br />
+            <script>
+              document
+                .getElementById("toLoginBtn")
+                .addEventListener("click", () => {
+                  localStorage.setItem("buttonClicked", "true");
+                });
+            </script>
+          </div>
+        </a>
+
+        <a href="../signuppage/index.html">
+          <button id="toCreateBtn">Create Account →</button>
+          <script>
+            document
+              .getElementById("toCreateBtn")
+              .addEventListener("click", () => {
+                localStorage.setItem("buttonClicked", "true");
+              });
+          </script>
+        </a>
+      </div>
+    </div>
+
+    <div id="main">
+      <div class="content-area">
+        <div class="typewriter-container">
+          <div class="typewriter">
+            <span class="static-text">AI Powered Fitness Analysis for </span>
+            <br />
+            <span class="animated-text"></span>
+          </div>
+
+          <div id="info-text">
+            <p>
+              Optimise your training with cutting-edge AI. PeakForm analyzes
+              your movements like a pro coach, giving you real-time feedback to
+              perfect your form, tempo, and technique — so every rep counts.
+            </p>
+          </div>
+
+          <div id="buttons2">
+            <a href="../signuppage/index.html">
+              <button id="startBtn">Start for free →</button>
+              <script>
+                document
+                  .getElementById("startBtn")
+                  .addEventListener("click", () => {
+                    localStorage.setItem("buttonClicked", "true");
+                  });
+              </script>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer">
+      <p>Author: Raymond Wu</p>
+      <p>copyright reserved</p>
+      <p>Social Media</p>
+
+      <a target="_blank" href="https://youtube.com">
+        <i class="fa-brands fa-youtube fa-2x"></i>
+      </a>
+
+      <a target="_blank" href="instagram.com">
+        <i class="fa-brands fa-instagram fa-2x"></i>
+      </a>
+
+      <a target="_blank" href="x.com">
+        <i class="fa-brands fa-x-twitter fa-2x"></i>
+      </a>
+    </div>
+
+    <script src="index.js"></script>
+    <script
+      src="https://kit.fontawesome.com/d48b70616c.js"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

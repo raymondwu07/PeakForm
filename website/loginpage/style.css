@@ -1,0 +1,168 @@
+body {
+    margin: 0;
+    min-height: 100vh; 
+    background-color: #0D1227;
+    background-attachment: fixed; 
+    color:white;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.03rem;
+}
+
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 1rem 2rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-color: rgba(10, 15, 31, 0.5);
+    z-index: 1000; 
+    box-sizing: border-box;
+    display: flex; 
+    align-items: center; 
+    gap: 1rem; 
+
+}
+
+#header-text-container {
+    display: flex;
+    flex-direction: column;  
+    gap: 0.2rem;         
+
+  
+}
+#header-text-container p{
+    color: #B9C3FF;
+    margin: 0;
+}
+  
+#headertext, #header  {
+    margin: 0;  
+    color: white;
+}
+  
+#header img {
+    height: 40px;
+    width: auto;
+}
+ 
+#signupButton{
+    background-color: #f2f2f2;
+    color: #287665;
+    border: none;
+    transition: background-color 0.5s;
+
+}
+
+#signupButton:hover{
+    cursor: pointer;
+    background-color: #d9d9d9;
+    animation-name: glow;
+    animation-iteration-count: infinte;
+    animation-duration: 2s;
+}
+
+#submitBtn{
+    background: #9259DD;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    margin: 0.5rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 20px;
+    font-weight: 100;
+}
+
+#goBackBtn{
+    background: transparent;
+    color: #B9C3FF;
+    padding: 0.75rem 1.5rem;
+    margin: 0.5rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    border: 1px solid #B9C3FF;
+    border-radius: 20px;
+    font-weight: 100;
+}
+
+#buttons{
+    padding-bottom: 10px;
+}
+
+#loginSection{
+    background-color: #161B33;
+    border-radius: 15px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 500px;
+    margin: 6rem auto 2rem; 
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: none;
+
+    color: white;
+}
+
+#loginSection label{
+    color: #B9C3FF;
+}
+
+#loginUsername, #loginPassword{
+    width: 490px; 
+    padding: 0.75rem; 
+    border-radius: 8px;
+    background: #1C223E;
+    border: none;
+    color: white;
+    box-sizing: border-box; 
+    transition: border-color 0.3s ease; 
+    min-width: auto; 
+    max-width: none;
+}
+
+#loginUsername input:focus, #loginPassword input:focus{
+    border: 1px solid white;
+    outline: none;
+}
+button {
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#signupLine{
+    font-size: 14px
+}
+
+#signup{
+    color: #9259DD;
+}
+
+#signup:hover{
+    cursor: pointer;
+    text-decoration: underline #9259DD;
+}
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(185, 195, 255, 0.3);
+}
+
+#header-wrapper{
+    text-align: center;
+}
+
+#loginContainer + #passwordContainer{
+    margin-top: 35px;
+}
+
+#loginContainer label, #loginContainer input{
+    margin-top: 20px; 
+}
+
+#passwordContainer label, #passwordContainer input{
+    margin-top: 20px;
+} 
+
+#passwordContainer, #buttons{
+    margin-top: 20px; 
+}

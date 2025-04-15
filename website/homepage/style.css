@@ -1,0 +1,242 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(
+        to bottom, 
+        #0A0F1F,   
+        #320d7a     
+    );
+    background-attachment: fixed; 
+    color:white;
+    font-family: 'Space Grotesk', sans-serif;
+    letter-spacing: 0.03rem;
+
+}
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 1rem 2rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background-color: rgba(10, 15, 31, 0.5);
+    z-index: 1000;
+    box-sizing: border-box;
+    display: flex; 
+    align-items: center; 
+    gap: 1rem; 
+}
+
+#header-text-container {
+    display: flex;
+    flex-direction: column;  
+    gap: 0.2rem;         
+
+  
+}
+#header-text-container p{
+    color: #B9C3FF;
+    margin: 0;
+}
+  
+#headertext, #header  {
+    margin: 0;  
+    color: white;
+}
+  
+#header img {
+    height: 40px;
+    width: auto;
+}
+
+#toCreateBtn{
+    background: transparent;       
+    border: 1px solid white;     
+    color: white;                
+    padding: 0.5rem;     
+    border-radius: 20px;           
+    cursor: pointer;
+    transition: all 0.3s ease;  
+
+
+} 
+#toCreateBtn:hover{
+    cursor: pointer;
+    animation-iteration-count: infinite;
+    background-color: rgb(163, 163, 163);
+
+}
+
+#toLoginBtn{
+    background-color: rgb(10, 15, 31);
+    color: white;
+    border: none;
+    transition: color 0.3s;
+    padding: 0;               
+    margin: 0;                
+    font: inherit;            
+    text-decoration: none;  
+
+}
+
+#toLoginBtn:hover{
+    cursor: pointer;
+    color: #818ccc;
+    animation-iteration-count: infinite;
+}
+
+#buttons1 {
+    display: flex;
+    gap: 1rem;
+    margin-left: auto;
+    align-items: center; 
+}
+
+#main {
+    position: relative;
+    min-height: 100vh;
+    padding-top: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+}
+
+.typewriter-container + #info-text {
+    margin-top: -2rem;     
+  }
+  
+#static-text{
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    text-align: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    letter-spacing: -0.05em; 
+    background: linear-gradient(90deg, #B9C3FF, #FFFFFF);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 10px rgba(185, 195, 255, 0.7);
+}
+
+#info-text {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    color: white; 
+    font-size: 1.2rem;
+    line-height: 1.6;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 100;
+
+  }
+
+.typewriter-container {
+    position: relative;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+
+}
+  
+.typewriter {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    display: inline-block;
+
+}
+  
+.static-text {
+    display: inline;
+    background: linear-gradient(90deg, #B9C3FF, #FFFFFF);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+
+}
+  
+.animated-text {
+    display: inline-block;
+    position: relative;
+    color: white; 
+    font-weight: bold;
+}
+  
+
+.animated-text::after {
+    content: "|";
+    position: absolute;
+    right: -8px;
+    animation: blink 0.7s step-end infinite;
+}
+  
+
+.animated-text::before {
+    content: "";
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+    animation: 
+      typing 8s steps(30, end) infinite,
+      word-switch 32s linear infinite; 
+}
+  
+@keyframes typing {
+    0%, 10% { width: 0; }
+    20%, 70% { width: 100%; }
+    80%, 100% { width: 0; } 
+}
+  
+@keyframes word-switch {
+    0%, 24% { content: "Athletes"; }
+    25%, 49% { content: "Bodybuilders"; }
+    50%, 74% { content: "Beginners"; }
+    75%, 100% { content: "You"; }
+}
+  
+@keyframes blink {
+    0% { opacity: 1; }  
+    50% { opacity: 0; }  
+    100% { opacity: 1; } 
+}
+
+#startBtn{
+    background-color: #9259DD;
+    border: none;
+    border-radius: 30px;
+    height: 50px;
+    width: 160px;
+    color: rgb(255, 255, 255);
+    font-size: 16px;
+    letter-spacing: 0.03rem;
+    transition: background-color 0.3s
+}
+
+#startBtn:hover{
+    background-color: #7648b3;
+    cursor: pointer;
+
+}
+
+#buttons2{
+    padding-top:30px;
+}
+  
+#footer{
+    color: white;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PeakForm AI - Training Log</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/x-icon" href="images/webfavicon2.ico" />
+  </head>
+  <body>
+    <div id="header">
+      <img src="images/icon.png" />
+      <div id="header-text-container">
+        <h1 id="headertext">PeakForm AI</h1>
+        <p>AI Fitness Trainer & Health Logger</p>
+      </div>
+    </div>
+
+    <div id="dataEntry" class="hidden">
+      <h2 id="welcomeHeader"></h2>
+      <h3 id="logText">Log Exercise for: <span id="selectedDay"></span></h3>
+      <button id="displayCurrentBtn">Display Today's Data</button>
+      <div id="exerciseInputs"></div>
+      <button id="addSetBtn" class="buttons">Add Another Set</button>
+      <button id="submitData" class="buttons">Submit</button>
+      <button id="goBackBtn" class="buttons">Go Back</button>
+    </div>
+
+    <div id="calendarContainer">
+      <div id="calendar">
+        <div id="calendarHeader">
+          <button id="prev" onclick="prevMonth()">prev</button>
+          <h2 id="monthName"></h2>
+          <button id="next" onclick="nextMonth()">next</button>
+        </div>
+        <div id="daysContainer"></div>
+      </div>
+
+      <button id="moveToUploadBtn">Analyse Video</button>
+      <button id="goBackBtn2" class="hidden">Go Back</button>
+    </div>
+
+    <div id="footer">
+      <p>Author: Raymond Wu</p>
+      <p>copyright reserved</p>
+      <p>Social Media</p>
+
+      <a target="_blank" href="https://youtube.com">
+        <i class="fa-brands fa-youtube fa-2x"></i>
+      </a>
+
+      <a target="_blank" href="https://instagram.com">
+        <i class="fa-brands fa-instagram fa-2x"></i>
+      </a>
+
+      <a target="_blank" href="https://x.com">
+        <i class="fa-brands fa-x-twitter fa-2x"></i>
+      </a>
+    </div>
+
+    <script>
+      const calendar = document.getElementById("calendarContainer");
+      const dataEntry = document.getElementById("dataEntry");
+      const monthName = document.getElementById("monthName");
+      const daysContainer = document.getElementById("daysContainer");
+      const selectedDayElem = document.getElementById("selectedDay");
+      const exerciseInputsContainer = document.getElementById("exerciseInputs");
+      const addSetBtn = document.getElementById("addSetBtn");
+      const goBackBtn = document.getElementById("goBackBtn");
+      const goBackBtn2 = document.getElementById("goBackBtn2");
+
+      exerciseInputsContainer.setAttribute("id", "exerciseInputsContainer");
+
+      let burnedAndConsumed = [0, 0];
+
+      const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
+      const months31d = [
+        "January",
+        "March",
+        "May",
+        "July",
+        "August",
+        "October",
+        "December",
+      ];
+
+      let add = true;
+      let exerciseSetCount = 0;
+
+      function nextMonth() {
+        let monthIndex = months.indexOf(monthName.textContent);
+        if (monthIndex === 11) {
+          monthIndex = 0;
+        } else {
+          monthIndex += 1;
+        }
+        monthName.textContent = months[monthIndex];
+        if (months31d.includes(months[monthIndex])) {
+          console.log("should be 31");
+          for (let i = 28; i <= 31; i++) {
+            if (
+              document.getElementById(`day${i}`).classList.contains("hidden")
+            ) {
+              document.getElementById(`day${i}`).classList.remove("hidden");
+            }
+          }
+        } else {
+          if (months[monthIndex] == "February") {
+            if (
+              !document.getElementById("day28").classList.contains("hidden")
+            ) {
+              for (let i = 28; i <= 31; i++) {
+                if (
+                  !document
+                    .getElementById(`day${i}`)
+                    .classList.contains("hidden")
+                ) {
+                  document.getElementById(`day${i}`).classList.add("hidden");
+                }
+              }
+            }
+          } else {
+            if (!months31d.includes(months[monthIndex])) {
+              if (
+                !document.getElementById("day31").classList.contains("hidden")
+              ) {
+                document.getElementById("day31").classList.add("hidden");
+              }
+            }
+          }
+        }
+      }
+
+      function prevMonth() {
+        let monthIndex = months.indexOf(monthName.textContent);
+        if (monthIndex === 0) {
+          monthIndex = 11;
+        } else {
+          monthIndex -= 1;
+        }
+        monthName.textContent = months[monthIndex];
+        if (months31d.includes(months[monthIndex])) {
+          for (let i = 28; i <= 31; i++) {
+            if (
+              document.getElementById(`day${i}`).classList.contains("hidden")
+            ) {
+              document.getElementById(`day${i}`).classList.remove("hidden");
+            }
+          }
+        } else {
+          if (months[monthIndex] == "February") {
+            if (
+              !document.getElementById("day28").classList.contains("hidden")
+            ) {
+              for (let i = 28; i <= 31; i++) {
+                if (
+                  !document
+                    .getElementById(`day${i}`)
+                    .classList.contains("hidden")
+                ) {
+                  document.getElementById(`day${i}`).classList.add("hidden");
+                }
+              }
+            }
+          } else {
+            if (!months31d.includes(months[monthIndex])) {
+              if (
+                !document.getElementById("day31").classList.contains("hidden")
+              ) {
+                document.getElementById("day31").classList.add("hidden");
+              }
+            }
+          }
+        }
+      }
+
+      function storeDay(day) {
+        const dayStorage = document.createElement("p");
+        dayStorage.setAttribute("id", "dayStorage");
+        dayStorage.textContent = `${day}`;
+        dayStorage.classList.add("hidden");
+        daysContainer.appendChild(dayStorage);
+      }
+
+      function createCalendar() {
+        for (let i = 1; i <= 12; i++) {
+          const month = document.createElement("div");
+          month.id = `month${i}`;
+          calendar.appendChild(month);
+
+          if (i !== 1) {
+            month.classList.add("hidden");
+          } else {
+            monthName.textContent = months[i - 1];
+          }
+
+          const numDays = i === 2 ? 28 : i % 2 === 0 ? 30 : 31;
+          const daysContainer = document.createElement("div");
+          daysContainer.classList.add("daysContainer");
+          month.appendChild(daysContainer);
+
+          for (let j = 1; j <= numDays; j++) {
+            let dayBtn = document.createElement("button");
+            dayBtn.classList.add("day");
+            dayBtn.setAttribute("id", `day${j}`);
+            dayBtn.textContent = j;
+
+            dayBtn.onclick = () => {
+              storeDay(j);
+              openDataEntry(j);
+            };
+            daysContainer.appendChild(dayBtn);
+            console.log("hello");
+          }
+        }
+      }
+
+      function openDataEntry(day) {
+        selectedDayElem.textContent = `${monthName.textContent} ${day}`;
+        calendar.classList.add("hidden");
+        dataEntry.classList.remove("hidden"); /* ------------------*/
+        exerciseSetCount = 0;
+        exerciseInputsContainer.innerHTML = "";
+        localStorage.setItem("intake", "true");
+        addExerciseInput();
+      }
+
+      function addExerciseInput() {
+        exerciseSetCount++;
+
+        const exerciseSetDiv = document.createElement("div");
+        exerciseSetDiv.classList.add("exercise-set");
+        exerciseSetDiv.setAttribute("id", "exerciseSetDiv");
+
+        const exerciseNameLabel = document.createElement("label");
+        exerciseNameLabel.textContent = "Exercise Name:";
+        const exerciseNameInput = document.createElement("input");
+        exerciseNameInput.type = "text";
+        exerciseNameInput.name = `exerciseName${exerciseSetCount}`;
+        exerciseNameInput.setAttribute("id", `exerciseName${exerciseSetCount}`);
+
+        const weightLabel = document.createElement("label");
+        weightLabel.textContent = "Weight:";
+        const weightInput = document.createElement("input");
+        weightInput.type = "number";
+        weightInput.name = `weight${exerciseSetCount}`;
+        weightInput.setAttribute("id", `weight${exerciseSetCount}`);
+
+        const repsLabel = document.createElement("label");
+        repsLabel.textContent = "Reps:";
+        const repsInput = document.createElement("input");
+        repsInput.type = "number";
+        repsInput.name = `reps${exerciseSetCount}`;
+        repsInput.setAttribute("id", `reps${exerciseSetCount}`);
+
+        const consumedLabel = document.createElement("label");
+        consumedLabel.textContent = "Calories Consumed: ";
+        const consumedInput = document.createElement("input");
+        consumedInput.type = "text";
+        consumedInput.name = "consumed";
+        consumedInput.setAttribute("id", "consumed");
+
+        const burnedLabel = document.createElement("label");
+        burnedLabel.textContent = "Calories Burned: ";
+        const burnedInput = document.createElement("input");
+        burnedInput.type = "text";
+        burnedInput.name = "burned";
+        burnedInput.setAttribute("id", "burned");
+
+        if (localStorage.getItem("intake") == "true") {
+          exerciseSetDiv.appendChild(document.createElement("br"));
+          exerciseSetDiv.appendChild(consumedLabel);
+          exerciseSetDiv.appendChild(consumedInput);
+          exerciseSetDiv.appendChild(document.createElement("br"));
+          exerciseSetDiv.appendChild(burnedLabel);
+          exerciseSetDiv.appendChild(burnedInput);
+          exerciseSetDiv.appendChild(document.createElement("br"));
+
+          exerciseSetDiv.appendChild(document.createElement("br"));
+          exerciseSetDiv.appendChild(exerciseNameLabel);
+          exerciseSetDiv.appendChild(exerciseNameInput);
+          exerciseSetDiv.appendChild(document.createElement("br"));
+
+          exerciseSetDiv.appendChild(weightLabel);
+          exerciseSetDiv.appendChild(weightInput);
+          exerciseSetDiv.appendChild(document.createElement("br"));
+          exerciseSetDiv.appendChild(repsLabel);
+          exerciseSetDiv.appendChild(repsInput);
+
+          exerciseInputsContainer.appendChild(exerciseSetDiv);
+          localStorage.setItem("intake", "false");
+        } else {
+          exerciseSetDiv.appendChild(document.createElement("br"));
+          exerciseSetDiv.appendChild(exerciseNameLabel);
+          exerciseSetDiv.appendChild(exerciseNameInput);
+          exerciseSetDiv.appendChild(document.createElement("br"));
+
+          exerciseSetDiv.appendChild(weightLabel);
+          exerciseSetDiv.appendChild(weightInput);
+          exerciseSetDiv.appendChild(document.createElement("br"));
+          exerciseSetDiv.appendChild(repsLabel);
+          exerciseSetDiv.appendChild(repsInput);
+
+          exerciseInputsContainer.appendChild(exerciseSetDiv);
+        }
+      }
+
+      function restoreCalendar() {
+        calendar.classList.remove("hidden");
+        dataEntry.classList.add("hidden");
+        localStorage.setItem("intake", "true");
+        goBackBtn2.classList.add("hidden");
+      }
+
+      function returnExerciseCount() {
+        return exerciseSetCount;
+      }
+
+      function returnBurned() {
+        return document.getElementById("burned").value;
+      }
+
+      function returnConsumed() {
+        return document.getElementById("consumed").value;
+      }
+
+      goBackBtn.addEventListener("click", restoreCalendar);
+      addSetBtn.addEventListener("click", addExerciseInput);
+
+      createCalendar();
+    </script>
+  </body>
+</html>
+`

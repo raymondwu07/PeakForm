@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PeakForm AI - Sign Up</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/x-icon" href="images/webfavicon2.ico" />
+  </head>
+  <body>
+    <div id="header">
+      <img src="images/icon.png" />
+      <div id="header-text-container">
+        <h1 id="headertext">PeakForm AI</h1>
+        <p>AI Fitness Trainer & Health Logger</p>
+      </div>
+    </div>
+
+    <div id="signupSection">
+      <h2 id="signupTxt">Signup</h2>
+      <h3 id="loginline">
+        Already have an account?
+        <a id="login" href="../loginpage/index.html">Login in here</a>
+      </h3>
+      <div id="emailContainer" class="loginInputs">
+        <label for="loginEmail">Email:</label> <br />
+        <input type="text" id="loginEmail" /><br />
+      </div>
+
+      <div id="passwordContainer" class="loginInputs">
+        <label for="loginUsername">Username:</label> <br />
+        <input type="text" id="loginUsername" /> <br />
+      </div>
+
+      <div id="loginContainer" class="loginInputs">
+        <label for="loginPassword">Password:</label> <br />
+        <input type="text" id="loginPassword" value="" /> <br />
+      </div>
+      <div id="submitDiv">
+        <button id="submitBtn">Create Account</button>
+        <script>
+          document.getElementById("submitBtn").addEventListener("click", () => {
+            localStorage.setItem("buttonClicked", "true");
+          });
+        </script>
+      </div>
+      <div id="passWrapper">
+        <div id="generatePasswordSection">
+          <button id="generateBtn">Generate Password</button>
+          <script>
+            document
+              .getElementById("generateBtn")
+              .addEventListener("click", () => {
+                localStorage.setItem("buttonClicked", "true");
+              });
+          </script>
+        </div>
+      </div>
+
+      <a href="../homepage/index.html">
+        <button id="goBackBtn">← go back</button>
+        <script>
+          document.getElementById("goBackBtn").addEventListener("click", () => {
+            localStorage.setItem("buttonClicked", "true");
+          });
+        </script>
+      </a>
+    </div>
+
+    <script
+      src="https://kit.fontawesome.com/d48b70616c.js"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

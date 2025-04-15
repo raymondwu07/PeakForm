@@ -1,0 +1,10 @@
+python3 -m http.server 5500 //to start
+
+python3 /Users/raymondwu/codingprograms/trainer/website/signuppage/index.py
+
+// to kill
+ps aux | grep http.server
+get the PID (first string of numbers)
+kill (PID)
+
+/Users/raymondwu/codingprograms/trainer/website/signuppage/index.html
