@@ -62,17 +62,9 @@ body {
     cursor: pointer;
 }
 
-#toCalendar {
-    border-radius: 10px;
-    background-color: #f2f2f2;
-    color: #287665;
-    border: none;
-    transition: background-color 0.5s;
-    cursor: pointer;
-}
 
 #header, #toCalendar{
-    margin: auto
+    margin: auto;
 }
 
 
@@ -293,7 +285,7 @@ button:hover, .btn:hover{
 }
 
 #displayDiv{
-    background-color: #161B33;
+    background-color: #161B33; 
     border-radius: 15px;
     padding: 2rem;
     width: 90%;
@@ -303,6 +295,7 @@ button:hover, .btn:hover{
     border: none;
     text-align: center;
     color: white;
+    padding-bottom: 10px;
 }
 
 #goBackBtn2{
@@ -315,4 +308,53 @@ button:hover, .btn:hover{
     max-width: 200px;
 }
 
+.exerciseDivs{
+    background-color: #B9C3FF; 
+    border-radius: 15px;
+    padding: 0.5rem;
+    width: 90%;
+    max-width: 500px;
+    margin: 6rem auto 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: none;
+    text-align: center;
+    color: #161B33;
+    font-weight: 30;
 
+}
+
+#caloriesDiv{
+    background-color: #B9C3FF; 
+    border-radius: 15px;
+    padding: 0.5rem;
+    width: 90%;
+    max-width: 500px;
+    margin: 2rem auto 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: none;
+    text-align: center;
+    color: #161B33;
+    font-weight: 30;
+}
+
+.exerciseDivs, caloriesDiv{
+    margin-top: -5px;
+}
+
+#displayh2{
+    color: #B9C3FF;
+}
+
+.caloriesDiv, #displayh2{
+    margin-top: -0px;
+}
+
+#toCalendar{
+    position: relative;
+    margin-top:10px;
+    left: 50%;
+    right: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 200px;
+}

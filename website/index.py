@@ -461,6 +461,8 @@ while True:
                         data_json = "undefined"
                         data = {}
 
+                        burned = ""
+                        consumed = ""
                         for line in file2:
 
                             if getDate() in line:
@@ -511,20 +513,33 @@ while True:
 
                         let index = 0;
 
-                        let warningText = ""
-                        const para = document.createElement("p");
+                        let topText = ""
+
+                        const displayh2 = document.createElement("h2");
+                        const h2Div = document.createElement("div");
+
+                        h2Div.setAttribute("id", "h2Div");
+                        displayh2.setAttribute("id", "displayh2");
+
+                        h2Div.appendChild(displayh2);
+
 
 
                         if ('{data_json}' == "undefined"){{
-                            warningText = "No data to display for today"
-                            para.textContent = warningText;
-                            displayDiv.appendChild(para);
+                            topText = "No data to display for today";
+                            displayh2.textContent = topText;
+                            displayDiv.appendChild(h2Div);
                         }}
 
                         else{{
-                            let burned = {burned}
-                            let consumed = {consumed}
-                            
+                            let burned = "{burned} calories burned"
+                            let consumed = "{consumed} calories consumed"
+
+                            let date = document.getElementById("selectedDay").textContent;
+
+                            topText = `${{date}}`;
+                            displayh2.textContent= topText;
+
                             const caloriesDiv = document.createElement("div");
                             caloriesDiv.setAttribute("id", "caloriesDiv");
 
@@ -540,6 +555,7 @@ while True:
                             caloriesDiv.appendChild(consumedP);
                             caloriesDiv.appendChild(burnedP);
 
+                            displayDiv.appendChild(h2Div);
                             displayDiv.appendChild(caloriesDiv);
 
                             let data = JSON.parse('{data_json}');
@@ -557,7 +573,13 @@ while True:
                                 exerciseP.name = `exerciseP{{j}}`;
                                 exerciseP.classList.add("exerciseParas");
 
-                                exerciseP.textContent = Object.entries(data)[j][0] + ": " + Object.entries(data)[j][1] + " " + Object.entries(data)[j+1][0] + ": " + Object.entries(data)[j+1][1] + " " + Object.entries(data)[j+2][0] + ": " + Object.entries(data)[j+2][1] + "\\n";
+                                exerciseP.textContent = Object.entries(data)[j][1].charAt(0).toUpperCase() +
+                                                        Object.entries(data)[j][1].slice(1, Object.entries(data)[j][1].length) + 
+                                                        ":  " + 
+                                                        Object.entries(data)[j+1][1] + 
+                                                        "kg for " + 
+                                                        Object.entries(data)[j+2][1] + 
+                                                        " reps";
 
                                 exerciseDiv.appendChild(exerciseP);
                                 displayDiv.appendChild(exerciseDiv);
@@ -568,7 +590,9 @@ while True:
 
                             
                             const toCalendar = document.createElement("button");
-                            toCalendar.textContent = "Go back"; 
+                            toCalendar.textContent = "Go Back"; 
+                            toCalendar.setAttribute("id", "toCalendar");
+
 
                             document.body.insertBefore(displayDiv, document.getElementById("footer"));
                             document.body.insertBefore(toCalendar, document.getElementById("footer"));

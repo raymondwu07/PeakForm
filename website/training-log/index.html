@@ -232,7 +232,7 @@
       function openDataEntry(day) {
         selectedDayElem.textContent = `${monthName.textContent} ${day}`;
         calendar.classList.add("hidden");
-        dataEntry.classList.remove("hidden"); /* ------------------*/
+        dataEntry.classList.remove("hidden");
         exerciseSetCount = 0;
         exerciseInputsContainer.innerHTML = "";
         localStorage.setItem("intake", "true");
