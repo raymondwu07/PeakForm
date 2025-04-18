@@ -653,7 +653,9 @@ while True:
         def checkAnalyse():
             return driver.execute_script("""return localStorage.getItem("analyse", "true");""")
         
+
         while True:
+
             if checkGoBack() == "true":
                 driver.execute_script("""
                                     localStorage.setItem("backToCalendar", "false")
