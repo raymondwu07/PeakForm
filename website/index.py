@@ -701,6 +701,7 @@ while True:
                                         const videoURL = URL.createObjectURL(file);
                                         videoThumbnail.src = videoURL;
                                         videoThumbnail.style.display = "block";
+                                        videoThumbnail.controls = true;
                                         inputBtn.style.display = "none";
                                         localStorage.setItem("upload", "false");
                                       }

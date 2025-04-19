@@ -151,8 +151,8 @@ button:hover {
 
 #videoThumbnail{
     display: none;
-    height: 13rem;
-    width: 25rem;
+    max-height: 15rem;
+    width: 20rem;
 }
 
 #inputBtn{
