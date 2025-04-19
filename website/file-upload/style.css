@@ -127,6 +127,34 @@ button:hover {
     margin-top: 25px;
 }
 
-#inputerBtn, #myh3{
+
+#inputBtn, #myh3{
     margin-bottom: -30px;
+}
+
+#uploadDiv{
+    position: relative;
+    margin-bottom: -110px;
+    justify-content: center; 
+    align-items: center; 
+    flex-direction: column;
+}
+
+#thumbnailContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    max-height: 13rem;
+    margin-bottom:100px;
+}
+
+#videoThumbnail{
+    display: none;
+    height: 13rem;
+    width: 25rem;
+}
+
+#inputBtn{
+    margin-bottom: 18px;
 }

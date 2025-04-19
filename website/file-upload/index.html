@@ -17,8 +17,16 @@
 
     <div id="cardSection">
       <h3 id="myh3">AI Analyser</h3>
-      <input type="file" id="fileInput" accept="video/HEVC, video/mp4, video/mov"hidden> <br> <br>
-      <label for="fileInput" id="inputBtn">Upload Video</label><br>
+      <div id="uploadDiv">
+
+        <input type="file" id="fileInput" accept="video/HEVC, video/mp4, video/mov"hidden> <br> <br>
+        <label for="fileInput" id="inputBtn">Upload Video</label>
+
+        <div id="thumbnailContainer">
+          <video id="videoThumbnail" muted></video>
+        </div>
+
+      </div>
 
       <button id="analyseBtn"> Analyse </button> <br> <br>
       <button id="goBackBtn">← Go Back</button>

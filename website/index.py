@@ -634,38 +634,78 @@ while True:
         print("file upload")
 
         driver.get("http://127.0.0.1:5501/trainer/website/file-upload/index.html")
-
-        
-        driver.execute_script("""const analyseBtn = document.getElementById("analyseBtn");
-                                 const goBackBtn = document.getElementById("goBackBtn");
-
-                                 analyseBtn.addEventListener("click", () => {
-                                     localStorage.setItem("analyse", "true")});
-
-                                 goBackBtn.addEventListener("click", () => {
-                                     localStorage.setItem("backToCalendar", "true")})
-                                     
-                              """)
         
         def checkGoBack():
             return driver.execute_script("""return localStorage.getItem("backToCalendar");""")
         
         def checkAnalyse():
-            return driver.execute_script("""return localStorage.getItem("analyse", "true");""")
+            return driver.execute_script("""return localStorage.getItem("analyse");""")
+        
+        def checkUpload():
+            return driver.execute_script("""return localStorage.getItem("upload"); """)
         
 
         while True:
+            driver.execute_script("""const analyseBtn = document.getElementById("analyseBtn");
+                                    const goBackBtn = document.getElementById("goBackBtn");
+                                    const videoThumbnail = document.getElementById("videoThumbnail");
+                                    const inputBtn = document.getElementById("inputBtn");
+                                    const fileInput = document.getElementById("fileInput");
+                                  
+                                    localStorage.setItem("upload", "false");
+                                    localStorage.setItem("analyse", "false");
+
+                                    analyseBtn.addEventListener("click", () => {
+                                        localStorage.setItem("analyse", "true")});
+
+                                    goBackBtn.addEventListener("click", () => {
+                                        localStorage.setItem("backToCalendar", "true")})
+                                
+                                    fileInput.addEventListener("change", () => {
+                                            localStorage.setItem("upload", "true");
+                                            })
+
+                                    
+                                """)
 
             if checkGoBack() == "true":
                 driver.execute_script("""
-                                    localStorage.setItem("backToCalendar", "false")
+                                    localStorage.setItem("backToCalendar", "false");
+                                    
+                                    if (localStorage.getItem("upload" == "true")){
+                                        document.getElementById("fileInput").value = '';
+                                        document.getElementById("inputBtn").display = "inline-flex";
+                                        document.getElementById("videoThumbnail").style.display = "none";
+                                        document.getElementById("videoThumbnail").src = "";
+                                        localStorage.setItem("upload", "false");
+                                    }  
+                                      
+                                    if (localStorage.getItem("analyse") == "true"){
+                                        localStorage.setItem("analyse", "false");
+                                      }
                                     window.location.href = "http://127.0.0.1:5501/trainer/website/training-log/index.html";
                                 """)
+
                 break
 
-            elif checkAnalyse() == "true":
+            if checkAnalyse() == "true":
                 print("analysing")
                 pass
+
+            if checkUpload() == "true":
+                driver.execute_script("""
+                                     const videoThumbnail = document.getElementById("videoThumbnail");
+                                     const inputBtn = document.getElementById("inputBtn");
+                                     const file = fileInput.files[0];
+                                     if (file && file.type.startsWith('video/')) {
+                                        const videoURL = URL.createObjectURL(file);
+                                        videoThumbnail.src = videoURL;
+                                        videoThumbnail.style.display = "block";
+                                        inputBtn.style.display = "none";
+                                        localStorage.setItem("upload", "false");
+                                      }
+                                     """)
+                print("uploaded")
 
 
 
