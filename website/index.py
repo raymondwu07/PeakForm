@@ -8,6 +8,7 @@ import time
 import datetime
 import os
 import json
+import cv2
 
 options = webdriver.ChromeOptions()
 options.add_argument("--incognito")
@@ -152,6 +153,11 @@ while True:
                         if not os.path.isdir(user_dir):
                             os.mkdir(user_dir)
 
+                            user_vids_dir = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids"
+                            if not os.path.isdir(user_vids_dir):
+                                os.mkdir(user_vids_dir)
+
+
                             try: 
                                 open(f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}Data", "x").close()
 
@@ -163,7 +169,6 @@ while True:
                             try:
                                 with open(f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}Info", "w") as file:
                                     file.write(f"{str(getEmail())}|{str(getUsername())}|{getPassword()}")
-                                    print("hihihihihihi")
                                     file.close()
                                 driver.execute_script("""
                                                     const signup = document.getElementById("signupTxt");
@@ -643,6 +648,42 @@ while True:
         
         def checkUpload():
             return driver.execute_script("""return localStorage.getItem("upload"); """)
+        
+        
+        def video_to_frames(video_path):
+            filename = os.path.splitext(os.path.basename(video_path))[0]
+            output_folder = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids/{filename}-frames"
+            target_fps = 15
+            cap = cv2.VideoCapture(video_path)
+
+            if not cap.isOpened():
+                print("Error: Cannot open video")
+                return
+            
+            original_fps = cap.get(cv2.CAP_PROP_FPS) 
+            frame_interval = original_fps / target_fps
+
+            if frame_interval < 1:
+                frame_interval = 1
+
+            os.makedirs(output_folder, exist_ok=True)
+
+            frame_count = 0
+            saved_count = 0
+
+            while True:
+                ret, frame = cap.read() 
+                if not ret:
+                    break
+
+                if frame_count % frame_interval == 0:
+                    frame_filename = os.path.join(output_folder, f"frame_{saved_count:05d}.jpg") 
+                    cv2.imwrite(frame_filename, frame)
+                    saved_count += 1
+
+                frame_count += 1
+
+            print(f"Saved {saved_count} frames to {output_folder}")
         
 
         while True:
