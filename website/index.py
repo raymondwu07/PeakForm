@@ -9,6 +9,7 @@ import datetime
 import os
 import json
 import cv2
+import shutil
 
 options = webdriver.ChromeOptions()
 options.add_argument("--incognito")
@@ -661,7 +662,7 @@ while True:
                 return
             
             original_fps = cap.get(cv2.CAP_PROP_FPS) 
-            frame_interval = original_fps / target_fps
+            frame_interval = int(original_fps / target_fps)
 
             if frame_interval < 1:
                 frame_interval = 1
@@ -726,19 +727,36 @@ while True:
                                       }
                                     window.location.href = "http://127.0.0.1:5501/trainer/website/training-log/index.html";
                                 """)
+                
+
 
                 break
 
             if checkAnalyse() == "true":
+                video_name = driver.execute_script(""" return localStorage.getItem("uploadedVideo"); """) 
+                filename = os.path.splitext(video_name)[0]
+                filetype = os.path.splitext(video_name)[1]
+                output_folder = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids"
+                driver.execute_script(f"""localStorage.setItem("file_name", "{filename}");""")
+
+                src_path = f"/Users/raymondwu/codingprograms/trainer/project-input/{video_name}"
+                video_path = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids/{filename + "_use" + filetype}"
+
+                shutil.copy2(src_path, video_path)
+
+                video_to_frames(video_path)
                 print("analysing")
                 pass
 
             if checkUpload() == "true":
+
+
                 driver.execute_script("""
                                      const videoThumbnail = document.getElementById("videoThumbnail");
                                      const inputBtn = document.getElementById("inputBtn");
                                      const file = fileInput.files[0];
                                      if (file && file.type.startsWith('video/')) {
+                                        localStorage.setItem("uploadedVideo", file.name);
                                         const videoURL = URL.createObjectURL(file);
                                         videoThumbnail.src = videoURL;
                                         videoThumbnail.style.display = "block";
@@ -747,7 +765,11 @@ while True:
                                         localStorage.setItem("upload", "false");
                                       }
                                      """)
+                
                 print("uploaded")
+
+
+
 
 
 
