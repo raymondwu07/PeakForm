@@ -733,20 +733,33 @@ while True:
                 break
 
             if checkAnalyse() == "true":
-                video_name = driver.execute_script(""" return localStorage.getItem("uploadedVideo"); """) 
-                filename = os.path.splitext(video_name)[0]
-                filetype = os.path.splitext(video_name)[1]
-                output_folder = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids"
-                driver.execute_script(f"""localStorage.setItem("file_name", "{filename}");""")
+                print("click")
+                video_name = driver.execute_script(""" return localStorage.getItem("uploadedVideo"); """)
 
-                src_path = f"/Users/raymondwu/codingprograms/trainer/project-input/{video_name}"
-                video_path = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids/{filename + "_use" + filetype}"
+                if type(video_name) != str:
+                    driver.execute_script("""
+                                const myh3 = document.getElementById("myh3");
+                                prevText = myh3.textContent;
+                                myh3.textContent = "Please upload a video before analysing";
+                                setTimeout(() => {myh3.textContent = prevText}, 4000)
+                                          """)
 
-                shutil.copy2(src_path, video_path)
+                else:
 
-                video_to_frames(video_path)
-                print("analysing")
-                pass
+                    filename = os.path.splitext(video_name)[0]
+                    filetype = os.path.splitext(video_name)[1]
+                    output_folder = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids"
+                    driver.execute_script(f"""localStorage.setItem("file_name", "{filename}");""")
+
+                    src_path = f"/Users/raymondwu/codingprograms/trainer/project-input/{video_name}"
+                    video_path = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids/{filename + "_use" + filetype}"
+
+                    shutil.copy2(src_path, video_path)
+
+                    video_to_frames(video_path)
+                    print("analysing")
+
+                    driver.execute_script("""window.location.href = "http://127.0.0.1:5501/trainer/website/analysispage/index.html";""")
 
             if checkUpload() == "true":
 
@@ -768,8 +781,21 @@ while True:
                 
                 print("uploaded")
 
+            if "/file-upload/index.html" not in driver.current_url:
+                break
 
 
+    #ANALYSIS PAGE ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    if "/analysispage/index.html" in driver.current_url:
+
+        print("analysis page")
+
+        driver.get("http://127.0.0.1:5501/trainer/website/analysispage/index.html")
+
+        while True:
+            if "/analysispage/index.html" not in driver.current_url:
+                break
 
 
 
