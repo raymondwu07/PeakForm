@@ -13,7 +13,7 @@ import shutil
 
 options = webdriver.ChromeOptions()
 options.add_argument("--incognito")
-
+ 
 
 #start web driver (chrome)
 driver = webdriver.Chrome(options=options)
