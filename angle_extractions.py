@@ -155,7 +155,3 @@ leftElbows, rightElbows = get_elbows_coords(nframes, x, y)
 leftWrists, rightWrists = get_wrists_coords(nframes, x, y)
 angles = get_all_angles_pullups(nframes, leftShoulders, leftElbows, leftWrists)
 starts , stops = find_eccentric(angles)
-
-
-
-
