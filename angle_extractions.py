@@ -13,14 +13,21 @@ def getAngle(shoulder, elbow, wrist):
 
     return angle
 
-def getRatio(angle1, angle2): # used for calculating ratio of 2 consecutive frames, for baseline ratio comparison
-    return (angle2/angle1)
+def get_average_ratio(start, stop, angles): # calculates average ratio across all reps for either concentric/eccentric movement, for baseline ratio comparison
+    average = 0
+    count = 0
+    for j in range(len(start)):
+        for i in range(start[j], stop[j], 1):
+            average += (angles[i]/angles[i+1])
+            count+=1
+    print(average, count)
+    return (average/count)
 
-def pullup_ecc_vs_conc(ratio, angle1, angle2): # calc angle diff for 1 arm, takes angle of 1 frame and 1 following frame, takes ratio of eccentric - if much faster then return false
-    return (angle1/angle2) < (ratio*0.9)
+def pullup_ecc_vs_con(con_ratio, ecc_ratio): # checks difference between concentric and eccentric ratio - if too eccentric changes too fast then return false
+    return ecc_ratio > 0.96*con_ratio
     
 def pullup_left_vs_right(leftAngle, rightAngle): # if one side's angle open is much different the return false
-    return abs(leftAngle - rightAngle) <= 0.08 * max(leftAngle, rightAngle)
+    return abs(leftAngle - rightAngle) <= 0.09 * max(leftAngle, rightAngle)
 
 def find_eccentric(angles, streak=4):
     starts = []
@@ -138,11 +145,32 @@ def get_all_angles_pullups(nframes, shoulders, elbows, wrists): # use for both l
 
     return angles
 
+def check_ratio(angles):
+    starts, stops = find_eccentric(angles)
+    starts_ecc, stops_ecc = starts, stops
+    starts_con, stops_con = [0], []
+    for i in range(len(starts)):
+        starts_con.append(stops_ecc[i])
+        stops_con.append(starts_ecc[i])
+    del starts_con[-1]
+        
+
+    print(starts_ecc, len(starts_ecc), stops_ecc, len(stops_ecc))
+    ecc_ratio = get_average_ratio(start=starts_ecc, stop=stops_ecc, angles=angles)
+    print(starts_con, len(starts_con), stops_con, len(stops_con))
+    con_ratio = get_average_ratio(start=starts_con, stop=stops_con, angles=angles)
+
+    return pullup_ecc_vs_con(con_ratio, ecc_ratio)
+
+
+
+
+
 
 
 model = YOLO("yolo11n-pose.pt") # n/x, n = nano, x = more complex
 
-results = model.predict(source="/Users/raymondwu/codingprograms/everythingelsenrn/python/dot/other/videos/pullups6.mp4", show=True)
+results = model.predict(source="/Users/raymondwu/codingprograms/everythingelsenrn/python/dot/other/videos/pullups8.MOV", show=True)
 
 #keypoints shape: [2, 17, 3], 3 --> [x,y,confidence]
 #print(results[0].keypoints.shape) # 5-10, shoulder to elbow to wrist, left right 
@@ -153,5 +181,9 @@ nframes = len(results)
 leftShoulders, rightShoulders = get_shoulders_coords(nframes, x, y)
 leftElbows, rightElbows = get_elbows_coords(nframes, x, y)
 leftWrists, rightWrists = get_wrists_coords(nframes, x, y)
-angles = get_all_angles_pullups(nframes, leftShoulders, leftElbows, leftWrists)
-starts , stops = find_eccentric(angles)
+left_angles = get_all_angles_pullups(nframes, leftShoulders, leftElbows, leftWrists)
+right_angles = get_all_angles_pullups(nframes, rightShoulders, rightElbows, rightWrists)
+
+print(check_ratio(left_angles))
+
+
