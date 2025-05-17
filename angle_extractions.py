@@ -185,5 +185,3 @@ left_angles = get_all_angles_pullups(nframes, leftShoulders, leftElbows, leftWri
 right_angles = get_all_angles_pullups(nframes, rightShoulders, rightElbows, rightWrists)
 
 print(check_ratio(left_angles))
-
-
