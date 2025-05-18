@@ -10,6 +10,9 @@ import os
 import json
 import cv2
 import shutil
+from ultralytics import YOLO
+from angle_extractions import *
+from angle_extractions import model
 
 options = webdriver.ChromeOptions()
 options.add_argument("--incognito")
@@ -756,7 +759,7 @@ while True:
 
                     shutil.copy2(src_path, video_path)
 
-                    video_to_frames(video_path)
+
                     print("analysing")
 
                     driver.execute_script("""window.location.href = "http://127.0.0.1:5501/trainer/website/analysispage/index.html";""")
@@ -793,9 +796,96 @@ while True:
 
         driver.get("http://127.0.0.1:5501/trainer/website/analysispage/index.html")
 
+        driver.execute_script("""
+                    goBackBtn = document.getElementById("goBackBtn");
+                    deadliftBtn = document.getElementById("deadliftBtn");
+                    squatBtn = document.getElementById("squatBtn");
+                    pullupBtn = document.getElementById("pullupBtn");
+
+
+                    goBackBtn.addEventListener("click", () => {
+                              localStorage.setItem("backToUpload", "true")})
+                    deadliftBtn.addEventListener("click", () => {
+                              localStorage.setItem("deadlift", "true")})
+                    squatBtn.addEventListener("click", () => {
+                              localStorage.setItem("squat", "true")})
+                    pullupBtn.addEventListener("click", () => {
+                              localStorage.setItem("pullup", "true")})
+                """)
+        
+        def checkDeadlift():
+            return driver.execute_script("""
+                    return localStorage.getItem("deadlift");
+                                         """)
+
+        def checkSquat():
+            return driver.execute_script("""
+                    return localStorage.getItem("squat");
+                                         """)
+    
+        def checkPullup():
+            return driver.execute_script("""
+                    return localStorage.getItem("pullup");
+                                            """)
+        
+        def checkGoBack():
+            return driver.execute_script("""
+                                         return localStorage.getItem("backToUpload");
+                                         """)
+        
+
+        def find_file_by_name(folder_path, filename_without_extension):
+            for root, dirs, files in os.walk(folder_path):
+                for file in files:
+                    name_only, _ = os.path.splitext(file)
+                    if name_only == filename_without_extension:
+                        return os.path.join(root, file)
+            return None
+        
+        analyse_count_pullup = 0
+        analyse_count_squat = 0
+        analyse_count_deadlift = 0
+        
         while True:
-            if "/analysispage/index.html" not in driver.current_url:
+            print("analysing")
+            if checkPullup():
+                video_name = driver.execute_script("""return localStorage.getItem("uploadedVideo")""").split(".") 
+                video_name = video_name[0]
+                video_name += "_use"
+                print(video_name)
+                video_path = find_file_by_name(f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids", video_name)
+
+                if video_path == None:
+                    print("video not found")
+                
+                else:
+                    if analyse_count_pullup == 0:
+                        results = model.predict(video_path, show=False, save=True)
+                        analysed_video_path = f"/Users/raymondwu/codingprograms/trainer/runs/pose/predict/imperfect_pull.mp4"
+
+                        x, y = get_coords_pullups(results)
+                        nframes = len(results)
+                        leftShoulders, rightShoulders = get_shoulders_coords(nframes, x, y)
+                        leftElbows, rightElbows = get_elbows_coords(nframes, x, y)
+                        leftWrists, rightWrists = get_wrists_coords(nframes, x, y)
+                        left_angles = get_all_angles_pullups(nframes, leftShoulders, leftElbows, leftWrists)
+                        right_angles = get_all_angles_pullups(nframes, rightShoulders, rightElbows, rightWrists)
+                        analyse_count_pullup += 1
+
+                    if not pullup_left_vs_right_all(left_angles, right_angles):
+                        print("make an even strength distribution")
+                        pass
+
+                    if not check_ratio(left_angles):
+                        print("slow down eccentric")
+                        pass
+
+
+            if checkGoBack() == "true":
                 break
+
+
+
 
 
 

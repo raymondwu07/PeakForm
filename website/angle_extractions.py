@@ -20,7 +20,6 @@ def get_average_ratio(start, stop, angles): # calculates average ratio across al
         for i in range(start[j], stop[j], 1):
             average += (angles[i]/angles[i+1])
             count+=1
-    print(average, count)
     return (average/count)
 
 def pullup_ecc_vs_con(con_ratio, ecc_ratio): # checks difference between concentric and eccentric ratio - if too eccentric changes too fast then return false
@@ -155,22 +154,21 @@ def check_ratio(angles):
     del starts_con[-1]
         
 
-    print(starts_ecc, len(starts_ecc), stops_ecc, len(stops_ecc))
+
     ecc_ratio = get_average_ratio(start=starts_ecc, stop=stops_ecc, angles=angles)
-    print(starts_con, len(starts_con), stops_con, len(stops_con))
     con_ratio = get_average_ratio(start=starts_con, stop=stops_con, angles=angles)
 
     return pullup_ecc_vs_con(con_ratio, ecc_ratio)
 
-
-
-
-
+def pullup_left_vs_right_all(left_angles, right_angles): # ASSUMING STRAIGHT ON VIEW
+    for i in range(len(left_angles)):
+        if not pullup_left_vs_right(left_angles[i], right_angles[i]):
+            return False
 
 
 model = YOLO("yolo11n-pose.pt") # n/x, n = nano, x = more complex
 
-results = model.predict(source="/Users/raymondwu/codingprograms/everythingelsenrn/python/dot/other/videos/pullups8.MOV", show=True)
+"""results = model.predict(source="/Users/raymondwu/codingprograms/trainer/project-input/imperfect_pull.MOV", show=True, save=True)
 
 #keypoints shape: [2, 17, 3], 3 --> [x,y,confidence]
 #print(results[0].keypoints.shape) # 5-10, shoulder to elbow to wrist, left right 
@@ -185,3 +183,4 @@ left_angles = get_all_angles_pullups(nframes, leftShoulders, leftElbows, leftWri
 right_angles = get_all_angles_pullups(nframes, rightShoulders, rightElbows, rightWrists)
 
 print(check_ratio(left_angles))
+print(pullup_left_vs_right_all(left_angles, right_angles))"""
