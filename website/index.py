@@ -848,7 +848,8 @@ while True:
         
         while True:
             print("analysing")
-            if checkPullup():
+            if checkPullup() == "true":
+                print("doing pullup")
                 video_name = driver.execute_script("""return localStorage.getItem("uploadedVideo")""").split(".") 
                 video_name = video_name[0]
                 video_name += "_use"
@@ -860,7 +861,7 @@ while True:
                 
                 else:
                     if analyse_count_pullup == 0:
-                        results = model.predict(video_path, show=False, save=True)
+                        results = model.predict(video_path, show=False, save=False)
                         analysed_video_path = f"/Users/raymondwu/codingprograms/trainer/runs/pose/predict/imperfect_pull.mp4"
 
                         x, y = get_coords_pullups(results)
@@ -872,13 +873,80 @@ while True:
                         right_angles = get_all_angles(nframes, rightShoulders, rightElbows, rightWrists)
                         analyse_count_pullup += 1
 
-                    if not pullup_left_vs_right_all(left_angles, right_angles):
-                        print("make an even strength distribution")
-                        pass
+                        if not pullup_left_vs_right_all(left_angles, right_angles):
+                            print("make an even strength distribution")
+                            pass
 
-                    if not check_ratio(left_angles):
-                        print("slow down eccentric")
-                        pass
+                        if not check_ratio_pullups(left_angles):
+                            print("slow down eccentric")
+                            pass
+
+            if checkSquat() == "true":
+                print("doing squat")
+                video_name = driver.execute_script("""return localStorage.getItem("uploadedVideo")""").split(".") 
+                video_name = video_name[0]
+                video_name += "_use"
+                print(video_name)
+                video_path = find_file_by_name(f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids", video_name)
+
+                if video_path == None:
+                    print("video not found")
+                
+                else:
+                    if analyse_count_squat == 0:
+                        analyse_count_squat += 1
+                        results = model.predict(video_path, show=True, save=False)
+                        analysed_video_path = f"/Users/raymondwu/codingprograms/trainer/runs/pose/predict/imperfect_pull.mp4"
+
+                        x, y = get_coords_squat(results)
+                        nframes = len(results)
+                        leftShoulders, rightShoulders = get_shoulders_coords(nframes, x, y)
+                        leftHips, rightHips = get_hip_coords(nframes, x, y)
+                        leftKnees, rightKnees = get_knee_coords(nframes, x, y)
+                        leftAnkles, rightAnkles = get_ankle_coords(nframes, x, y)
+                        noses = get_nose_coords(nframes, x, y)
+                        left_angles = get_all_angles(nframes, leftHips, leftKnees, leftAnkles)
+                        right_angles = get_all_angles(nframes, rightHips, rightKnees, rightAnkles)
+                        squat_direction = get_squat_direction(nframes, noses, rightHips)
+
+                        if squat_direction == "left":
+
+                            start_ecc, stop_ecc = find_eccentric_squats(left_angles)
+                            start_con, stop_con = stop_ecc, start_ecc
+
+                            if not check_all_squat_align(nframes, noses, leftShoulders, leftAnkles):
+                                print("Have shoulders/bar over midfoot for optimimal stability/bar path")
+
+                            if not check_all_bentover(nframes, leftShoulders, leftHips, leftAnkles):
+                                print("You are too bentover, be more upright during the motion")
+                        
+                            if not squat_depth_check(left_angles, stop_ecc):
+                                print("You need to squat deeper")
+
+                            if not check_ratio_squats(left_angles):
+                                print("slow down eccentric")
+                                pass
+                        
+                        elif squat_direction == "right":
+
+                            start_ecc, stop_ecc = find_eccentric_squats(right_angles)
+                            start_con, stop_con = stop_ecc, start_ecc
+
+                            if not check_all_squat_align(nframes, noses, rightShoulders, rightAnkles):
+                                print("Have shoulders/bar over midfoot for optimimal stability/bar path")
+
+                            if not check_all_bentover(nframes, rightShoulders, rightHips, rightAnkles):
+                                print("You are too bentover, be more upright during the motion")
+
+                            if not squat_depth_check(right_angles, stop_ecc):
+                                print("You need to squat deeper")
+
+                            if not check_ratio_squats(right_angles):
+                                print("slow down eccentric")
+                                pass
+
+                        """if not check_all_kneecaves(nframes, leftKnees, rightKnees, leftAnkles, rightAnkles):
+                            print("You are caving your knees in, have them facing the same direction as your feet")"""
 
 
             if checkGoBack() == "true":

@@ -22,11 +22,30 @@ def get_average_ratio(start, stop, angles): # calculates average ratio across al
             count+=1
     return (average/count)
 
-def pullup_ecc_vs_con(con_ratio, ecc_ratio): # checks difference between concentric and eccentric ratio - if too eccentric changes too fast then return false
+def ecc_vs_con_pullup(con_ratio, ecc_ratio): # checks difference between concentric and eccentric ratio - if too eccentric changes too fast then return false
+    print(ecc_ratio, con_ratio)
     return ecc_ratio > 0.96*con_ratio
+
+def ecc_vs_con_squat(con_ratio, ecc_ratio): # checks difference between concentric and eccentric ratio - if too eccentric changes too fast then return false
+    print(ecc_ratio, con_ratio)
+    return ecc_ratio > 0.99*con_ratio
     
 def pullup_left_vs_right(leftAngle, rightAngle): # if one side's angle open is much different the return false
     return abs(leftAngle - rightAngle) <= 0.09 * max(leftAngle, rightAngle)
+
+def pullup_depth_check(angles, stops): # use left or right arm - get_all_angles()
+    for i in range(len(stops)):
+        if angles[stops[i]] < 80:
+            return False # needs more depth
+        
+    return True # depth is fine
+
+def check_all_squat_align(nframes, noses, shoulders, ankles):
+    for i in range(nframes):
+        if not squat_align_check(noses[i], shoulders[i], ankles[i]):
+            return False
+        
+    return True
 
 def squat_align_check(nose, shoulder, ankle):
     if nose[0] < ankle[0]:
@@ -38,15 +57,48 @@ def squat_align_check(nose, shoulder, ankle):
         return False
     else:
         return True
+    
+def check_all_bentover(nframes, shoulders, hips, ankles):
+    for i in range(nframes):
+        if not bentover_check(shoulders[i], hips[i], ankles[i]):
+            return False
+        
+    return True
 
 def bentover_check(shoulder, hip, ankle): 
     return getAngle(shoulder, hip, ankle) > 40
 
+def check_all_kneecaves(nframes, left_knees, right_knees, left_ankles, right_ankles):
+    for i in range(nframes):
+        if not kneecave_check(left_knees[i], right_knees[i], left_ankles[i], right_ankles[i]):
+            return False
+        
+    return True
+
 def kneecave_check(left_knee, right_knee, left_ankle, right_ankle): # if knee distance is closer than ankle, then knee caving must be occuring (MUST BE FRONT ON)
     return abs(left_knee[0]-right_knee[0]) > abs(left_ankle[0]-right_ankle[0]) # abs to allow right left error
 
+def squat_depth_check(angles, stops): # use left or right leg - get_all_angles(), uses stop_ecc
+    for i in range(len(stops)):
+        if angles[stops[i]] > 85:
+            return False # needs more depth
+        
+    return True # depth is fine
 
-def find_eccentric(angles, streak=4):
+def get_squat_direction(nframes, noses, hips): # gets on average which is more too the left/right, nose or hips
+    face_left, face_right = 0, 0
+    for i in range(nframes):
+        if noses[i][0] < hips[i][0]:
+            face_left += 1
+        else: 
+            face_right += 1
+
+    if face_left > face_right:
+        return "left"
+    else:
+        return "right"
+
+def find_eccentric_pullups(angles, streak=6): # beginning of concentric = stops, end of concentric = start, streak is how many consecutive frames for change - due to jittery estimations
     starts = []
     stops = []
     eccentric = False
@@ -58,6 +110,40 @@ def find_eccentric(angles, streak=4):
 
         if not eccentric:
             if diff > 0:
+                increase_count += 1
+                if increase_count >= streak:
+                    starts.append(i - streak + 1)
+                    eccentric = True
+                    decrease_count = 0  # reset
+            else:
+                increase_count = 0
+        else:
+            if diff < 0:
+                decrease_count += 1
+                if decrease_count >= streak:
+                    stops.append(i - streak + 1)
+                    eccentric = False
+                    increase_count = 0  # reset
+            else:
+                decrease_count = 0
+
+    if eccentric:
+        stops.append(len(angles) - 1)
+
+    return starts, stops
+
+def find_eccentric_squats(angles, streak=6): # beginning of concentric = stops, end of concentric = start, streak is how many consecutive frames for change - due to jittery estimations
+    starts = []
+    stops = []
+    eccentric = False
+    increase_count = 0
+    decrease_count = 0
+
+    for i in range(1, len(angles)):
+        diff = angles[i] - angles[i - 1]
+
+        if not eccentric:
+            if diff < 0:
                 increase_count += 1
                 if increase_count >= streak:
                     starts.append(i - streak + 1)
@@ -213,8 +299,8 @@ def get_all_angles(nframes, shoulders, elbows, wrists): # use for both left or r
 
     return angles
 
-def check_ratio(angles):
-    starts, stops = find_eccentric(angles)
+def check_ratio_pullups(angles):
+    starts, stops = find_eccentric_pullups(angles)
     starts_ecc, stops_ecc = starts, stops
     starts_con, stops_con = [0], []
     for i in range(len(starts)):
@@ -227,7 +313,21 @@ def check_ratio(angles):
     ecc_ratio = get_average_ratio(start=starts_ecc, stop=stops_ecc, angles=angles)
     con_ratio = get_average_ratio(start=starts_con, stop=stops_con, angles=angles)
 
-    return pullup_ecc_vs_con(con_ratio, ecc_ratio)
+    return ecc_vs_con_pullup(con_ratio, ecc_ratio)
+
+def check_ratio_squats(angles):
+    starts, stops = find_eccentric_squats(angles)
+    starts_ecc, stops_ecc = starts, stops
+    starts_con, stops_con = [0], []
+    for i in range(len(starts)):
+        starts_con.append(stops_ecc[i])
+        stops_con.append(starts_ecc[i])
+    del starts_con[-1]
+
+    ecc_ratio = get_average_ratio(start=starts_ecc, stop=stops_ecc, angles=angles)
+    con_ratio = get_average_ratio(start=starts_con, stop=stops_con, angles=angles)
+
+    return ecc_vs_con_squat(ecc_ratio, con_ratio) # reversed params, temp fix
 
 def pullup_left_vs_right_all(left_angles, right_angles): # ASSUMING STRAIGHT ON VIEW
     for i in range(len(left_angles)):
@@ -235,9 +335,9 @@ def pullup_left_vs_right_all(left_angles, right_angles): # ASSUMING STRAIGHT ON 
             return False
 
 
-model = YOLO("yolo11x-pose.pt") # n/x, n = nano, x = more complex
+model = YOLO("yolo11n-pose.pt") # n/x, n = nano, x = more complex
 
-results = model.predict(source="/Users/raymondwu/codingprograms/trainer/project-input/Barbell Squat Side View.mp4", show=True, save=True)
+#results = model.predict(source="/Users/raymondwu/codingprograms/trainer/website/database/raymond/raymond-vids/perfect squat_use.mov", show=True, save=False)
 
 """#keypoints shape: [2, 17, 3], 3 --> [x,y,confidence]
 #print(results[0].keypoints.shape) # 5-10, shoulder to elbow to wrist, left right 
@@ -254,5 +354,20 @@ right_angles = get_all_angles(nframes, rightShoulders, rightElbows, rightWrists)
 print(check_ratio(left_angles))
 print(pullup_left_vs_right_all(left_angles, right_angles)) """
 
-squat_x, squat_y = get_coords_squat(results)
+"""x, y = get_coords_squat(results)
+nframes = len(results)
+leftShoulders, rightShoulders = get_shoulders_coords(nframes, x, y)
+leftHips, rightHips = get_hip_coords(nframes, x, y)
+leftKnees, rightKnees = get_knee_coords(nframes, x, y)
+leftAnkles, rightAnkles = get_ankle_coords(nframes, x, y)
+noses = get_nose_coords(nframes, x, y)
+left_angles = get_all_angles(nframes, leftHips, leftKnees, leftAnkles)
+right_angles = get_all_angles(nframes, rightHips, rightKnees, rightAnkles)
+squat_direction = get_squat_direction(nframes, noses, rightHips)
+
+stops_ecc, starts_ecc = find_eccentric_squats(right_angles, streak=7)"""
+
+
+
+#squat_x, squat_y = get_coords_squat(results)
 
