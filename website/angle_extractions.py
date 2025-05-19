@@ -28,6 +28,24 @@ def pullup_ecc_vs_con(con_ratio, ecc_ratio): # checks difference between concent
 def pullup_left_vs_right(leftAngle, rightAngle): # if one side's angle open is much different the return false
     return abs(leftAngle - rightAngle) <= 0.09 * max(leftAngle, rightAngle)
 
+def squat_align_check(nose, shoulder, ankle):
+    if nose[0] < ankle[0]:
+        angle = getAngle(shoulder, ankle, [0, ankle[1]]) # 3rd coord is the corner of screen, at height of ankle
+    else: # else, do opposite side, facing left/right etc
+        angle = getAngle(shoulder, ankle, [9999, ankle[1]]) # 3rd coord is the corner of screen, at height of ankle
+
+    if angle > 105 or angle < 75:
+        return False
+    else:
+        return True
+
+def bentover_check(shoulder, hip, ankle): 
+    return getAngle(shoulder, hip, ankle) > 40
+
+def kneecave_check(left_knee, right_knee, left_ankle, right_ankle): # if knee distance is closer than ankle, then knee caving must be occuring (MUST BE FRONT ON)
+    return abs(left_knee[0]-right_knee[0]) > abs(left_ankle[0]-right_ankle[0]) # abs to allow right left error
+
+
 def find_eccentric(angles, streak=4):
     starts = []
     stops = []
@@ -73,6 +91,19 @@ def get_coords_pullups(results):
 
         X[idx]=[keypoints[0, 5, 0].item(), keypoints[0, 6, 0].item(), keypoints[0, 7, 0].item(), keypoints[0, 8, 0].item(), keypoints[0, 9, 0].item(), keypoints[0, 10, 0].item()]
         Y[idx]=[keypoints[0, 5, 1].item(), keypoints[0, 6, 1].item(), keypoints[0, 7, 1].item(), keypoints[0, 8, 1].item(), keypoints[0, 9, 1].item(), keypoints[0, 10, 1].item()]
+
+    return X, Y
+
+def get_coords_squat(results): # squat coords - lrlr... shoulder, hip, knee, ankle, nose
+    nframes = len(results)
+    X = [[] for _ in range(nframes)]
+    Y = [[] for _ in range(nframes)]
+
+    for idx, result in enumerate(results):
+        keypoints = result.keypoints.data
+
+        X[idx]=[keypoints[0, 5, 0].item(), keypoints[0, 6, 0].item(), keypoints[0, 11, 0].item(), keypoints[0, 12, 0].item(), keypoints[0, 13, 0].item(), keypoints[0, 14, 0].item(), keypoints[0, 15, 0].item(), keypoints[0, 16, 0].item(), keypoints[0, 0, 0].item()]
+        Y[idx]=[keypoints[0, 5, 1].item(), keypoints[0, 6, 1].item(), keypoints[0, 11, 1].item(), keypoints[0, 12, 1].item(), keypoints[0, 13, 1].item(), keypoints[0, 14, 1].item(), keypoints[0, 15, 1].item(), keypoints[0, 16, 1].item(), keypoints[0, 0, 1].item()]
 
     return X, Y
 
@@ -137,7 +168,45 @@ def get_wrists_coords(nframes, X, Y):
 
     return leftWrists, rightWrists
 
-def get_all_angles_pullups(nframes, shoulders, elbows, wrists): # use for both left or right
+def get_hip_coords(nframes, X, Y): 
+    leftHips = []
+    rightHips = []
+
+    for i in range(nframes):
+        leftHips.append([X[i][2], Y[i][2]]) 
+        rightHips.append([X[i][3], Y[i][3]])
+
+    return leftHips, rightHips
+
+def get_knee_coords(nframes, X, Y): 
+    leftKnees = []
+    rightKnees = []
+
+    for i in range(nframes):
+        leftKnees.append([X[i][4], Y[i][4]]) 
+        rightKnees.append([X[i][5], Y[i][5]])
+
+    return leftKnees, rightKnees
+
+def get_ankle_coords(nframes, X, Y): 
+    leftAnkles = []
+    rightAnkles = []
+
+    for i in range(nframes):
+        leftAnkles.append([X[i][6], Y[i][6]]) 
+        rightAnkles.append([X[i][7], Y[i][7]])
+
+    return leftAnkles, rightAnkles
+
+def get_nose_coords(nframes, X, Y): 
+    noses = []
+
+    for i in range(nframes):
+        noses.append([X[i][8], Y[i][8]]) 
+
+    return noses
+
+def get_all_angles(nframes, shoulders, elbows, wrists): # use for both left or right
     angles = []
     for i in range(nframes):
         angles.append(getAngle(shoulders[i], elbows[i], wrists[i]))
@@ -166,11 +235,11 @@ def pullup_left_vs_right_all(left_angles, right_angles): # ASSUMING STRAIGHT ON 
             return False
 
 
-model = YOLO("yolo11n-pose.pt") # n/x, n = nano, x = more complex
+model = YOLO("yolo11x-pose.pt") # n/x, n = nano, x = more complex
 
-"""results = model.predict(source="/Users/raymondwu/codingprograms/trainer/project-input/imperfect_pull.MOV", show=True, save=True)
+results = model.predict(source="/Users/raymondwu/codingprograms/trainer/project-input/Barbell Squat Side View.mp4", show=True, save=True)
 
-#keypoints shape: [2, 17, 3], 3 --> [x,y,confidence]
+"""#keypoints shape: [2, 17, 3], 3 --> [x,y,confidence]
 #print(results[0].keypoints.shape) # 5-10, shoulder to elbow to wrist, left right 
 #X/Y size [nframes, 6 (lrlrlr)(s --> e --> w)]
 
@@ -179,8 +248,11 @@ nframes = len(results)
 leftShoulders, rightShoulders = get_shoulders_coords(nframes, x, y)
 leftElbows, rightElbows = get_elbows_coords(nframes, x, y)
 leftWrists, rightWrists = get_wrists_coords(nframes, x, y)
-left_angles = get_all_angles_pullups(nframes, leftShoulders, leftElbows, leftWrists)
-right_angles = get_all_angles_pullups(nframes, rightShoulders, rightElbows, rightWrists)
+left_angles = get_all_angles(nframes, leftShoulders, leftElbows, leftWrists)
+right_angles = get_all_angles(nframes, rightShoulders, rightElbows, rightWrists)
 
 print(check_ratio(left_angles))
-print(pullup_left_vs_right_all(left_angles, right_angles))"""
+print(pullup_left_vs_right_all(left_angles, right_angles)) """
+
+squat_x, squat_y = get_coords_squat(results)
+

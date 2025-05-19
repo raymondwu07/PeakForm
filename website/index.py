@@ -868,8 +868,8 @@ while True:
                         leftShoulders, rightShoulders = get_shoulders_coords(nframes, x, y)
                         leftElbows, rightElbows = get_elbows_coords(nframes, x, y)
                         leftWrists, rightWrists = get_wrists_coords(nframes, x, y)
-                        left_angles = get_all_angles_pullups(nframes, leftShoulders, leftElbows, leftWrists)
-                        right_angles = get_all_angles_pullups(nframes, rightShoulders, rightElbows, rightWrists)
+                        left_angles = get_all_angles(nframes, leftShoulders, leftElbows, leftWrists)
+                        right_angles = get_all_angles(nframes, rightShoulders, rightElbows, rightWrists)
                         analyse_count_pullup += 1
 
                     if not pullup_left_vs_right_all(left_angles, right_angles):
