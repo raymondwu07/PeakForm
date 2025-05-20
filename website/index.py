@@ -861,8 +861,8 @@ while True:
                 
                 else:
                     if analyse_count_pullup == 0:
+                        analyse_count_pullup += 1
                         results = model.predict(video_path, show=False, save=False)
-                        analysed_video_path = f"/Users/raymondwu/codingprograms/trainer/runs/pose/predict/imperfect_pull.mp4"
 
                         x, y = get_coords_pullups(results)
                         nframes = len(results)
@@ -871,7 +871,7 @@ while True:
                         leftWrists, rightWrists = get_wrists_coords(nframes, x, y)
                         left_angles = get_all_angles(nframes, leftShoulders, leftElbows, leftWrists)
                         right_angles = get_all_angles(nframes, rightShoulders, rightElbows, rightWrists)
-                        analyse_count_pullup += 1
+
 
                         if not pullup_left_vs_right_all(left_angles, right_angles):
                             print("make an even strength distribution")
@@ -896,7 +896,6 @@ while True:
                     if analyse_count_squat == 0:
                         analyse_count_squat += 1
                         results = model.predict(video_path, show=True, save=False)
-                        analysed_video_path = f"/Users/raymondwu/codingprograms/trainer/runs/pose/predict/imperfect_pull.mp4"
 
                         x, y = get_coords_squat(results)
                         nframes = len(results)
@@ -947,6 +946,53 @@ while True:
 
                         """if not check_all_kneecaves(nframes, leftKnees, rightKnees, leftAnkles, rightAnkles):
                             print("You are caving your knees in, have them facing the same direction as your feet")"""
+                        
+            if checkDeadlift() == "true":
+                print("doing deadlift")
+                video_name = driver.execute_script("""return localStorage.getItem("uploadedVideo")""").split(".") 
+                video_name = video_name[0]
+                video_name += "_use"
+                print(video_name)
+                video_path = find_file_by_name(f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids", video_name)
+
+                if video_path == None:
+                    print("video not found")
+                
+                else:
+                    if analyse_count_deadlift == 0:
+                        analyse_count_deadlift += 1
+                        x, y = get_coords_deadlift(results)
+                        nframes = len(results)
+                        leftShoulders, rightShoulders = get_shoulders_coords(nframes, x, y)
+                        leftHips, rightHips = get_hip_coords(nframes, x, y)
+                        leftKnees, rightKnees = get_knee_coords(nframes, x, y)
+                        leftAnkles, rightAnkles = get_ankle_coords(nframes, x, y)
+                        noses = get_nose_coords(nframes, x, y)
+                        left_knee_angles = get_all_angles(nframes, leftHips, leftKnees, leftAnkles)
+                        right_knee_angles = get_all_angles(nframes, rightHips, rightKnees, rightAnkles)
+                        left_hip_angles = get_all_angles(nframes, leftShoulders, leftHips, leftKnees)
+                        right_hip_angles = get_all_angles(nframes, rightShoulders, rightHips, rightKnees)
+                        deadlift_direction = get_deadlift_direction(nframes, noses, rightHips)
+
+                        if deadlift_direction == "left":
+
+                            result = check_all_ratios_deadlift(left_hip_angles, left_knee_angles)
+                            if result == 1:
+                                print("Open torso slower, you are turning this into a stiff-leg deadlift, too much emphasis on back")
+                            elif result == 2:
+                                print("Open torso faster, you are putting too much emphasis on your quads and knees")
+                            else:
+                                print("Good form")
+
+                            result = check_all_knees_deadlift(left_knee_angles)
+                            if result == 1:
+                                print("Bend knees more")
+                            elif result == 2:
+                                print("Straighten knees more")
+                            else:
+                                print("Good form")
+
+
 
 
             if checkGoBack() == "true":

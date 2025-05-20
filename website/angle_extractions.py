@@ -13,7 +13,7 @@ def getAngle(shoulder, elbow, wrist):
 
     return angle
 
-def get_average_ratio(start, stop, angles): # calculates average ratio across all reps for either concentric/eccentric movement, for baseline ratio comparison
+def get_average_ratio(start, stop, angles): # calculates average ratio across all reps for either concentric/eccentric movement, for baseline ratio comparison, for one side
     average = 0
     count = 0
     for j in range(len(start)):
@@ -192,6 +192,106 @@ def get_coords_squat(results): # squat coords - lrlr... shoulder, hip, knee, ank
         Y[idx]=[keypoints[0, 5, 1].item(), keypoints[0, 6, 1].item(), keypoints[0, 11, 1].item(), keypoints[0, 12, 1].item(), keypoints[0, 13, 1].item(), keypoints[0, 14, 1].item(), keypoints[0, 15, 1].item(), keypoints[0, 16, 1].item(), keypoints[0, 0, 1].item()]
 
     return X, Y
+
+def get_coords_deadlift(results): # same as squat - uses nose to find direction
+    nframes = len(results)
+    X = [[] for _ in range(nframes)]
+    Y = [[] for _ in range(nframes)]
+
+    for idx, result in enumerate(results):
+        keypoints = result.keypoints.data
+
+        X[idx]=[keypoints[0, 5, 0].item(), keypoints[0, 6, 0].item(), keypoints[0, 11, 0].item(), keypoints[0, 12, 0].item(), keypoints[0, 13, 0].item(), keypoints[0, 14, 0].item(), keypoints[0, 15, 0].item(), keypoints[0, 16, 0].item(), keypoints[0, 0, 0].item()]
+        Y[idx]=[keypoints[0, 5, 1].item(), keypoints[0, 6, 1].item(), keypoints[0, 11, 1].item(), keypoints[0, 12, 1].item(), keypoints[0, 13, 1].item(), keypoints[0, 14, 1].item(), keypoints[0, 15, 1].item(), keypoints[0, 16, 1].item(), keypoints[0, 0, 1].item()]
+
+    return X, Y
+
+def find_eccentric_deadlift(angles, streak=6): # use for torso and knee
+    starts = []
+    stops = []
+    eccentric = False
+    increase_count = 0
+    decrease_count = 0
+
+    for i in range(1, len(angles)):
+        diff = angles[i] - angles[i - 1]
+
+        if not eccentric:
+            if diff < 0:
+                increase_count += 1
+                if increase_count >= streak:
+                    starts.append(i - streak + 1)
+                    eccentric = True
+                    decrease_count = 0  # reset
+            else:
+                increase_count = 0
+        else:
+            if diff < 0:
+                decrease_count += 1
+                if decrease_count >= streak:
+                    stops.append(i - streak + 1)
+                    eccentric = False
+                    increase_count = 0  # reset
+            else:
+                decrease_count = 0
+
+    if eccentric:
+        stops.append(len(angles) - 1)
+
+    return starts, stops
+
+def check_ratio_deadlift(torso_open, knees_open): # use for concentric only
+    if torso_open > knees_open*1.6:
+        return 1 #Open torso slower, you are turning this into a stiff-leg deadlift, too much emphasis on back
+    
+    elif torso_open < knees_open*1.1:
+        return 2 #open torso faster, you are putting too much emphasis on your quads and knees
+    
+    else:
+        return 3 #good form
+    
+def check_all_ratios_deadlift(hip_angles, knees_angles): # uses check_ratio_deadlift() with average ratio
+    starts_ecc_hip, stops_ecc_hip = find_eccentric_deadlift(hip_angles)
+    starts_con_hip, stops_con_hip = stops_ecc_hip, starts_ecc_hip
+
+    starts_ecc_knee, stops_ecc_knee = find_eccentric_deadlift(knees_angles)
+    starts_con_knee, stops_con_knee = stops_ecc_knee, starts_ecc_knee
+
+    torso_open = get_average_ratio(starts_con_hip, stops_con_hip, hip_angles) # uses concentric, check_ratio_deadlift() works on only concentric motion
+    knees_open = get_average_ratio(starts_con_knee, stops_con_knee, knees_angles)
+
+    result = check_ratio_deadlift(torso_open, knees_open)
+
+    return result
+
+def get_deadlift_direction(nframes, noses, hips): # gets on average which is more too the left/right, nose or hips
+    face_left, face_right = 0, 0
+    for i in range(nframes):
+        if noses[i][0] < hips[i][0]:
+            face_left += 1
+        else: 
+            face_right += 1
+
+    if face_left > face_right:
+        return "left"
+    else:
+        return "right"
+    
+def check_deadlift_knees(knee_angle): # use at end of eccentric
+    if knee_angle > 80:
+        return 1 # bend knees a bit more
+    elif knee_angle < 50: 
+        return 2 # knees bent too much
+    else:
+        return 3 # good form
+    
+def check_all_knees_deadlift(knee_angles):
+    starts, stops = find_eccentric_deadlift(knee_angles, streak=4)
+    for i in range(len(stops)):
+        result = check_deadlift_knees(knee_angles[stops[i]])
+        if result != 3:
+            return result
+    return 3
 
 def print_coords_pullups(results):
     for result in enumerate(results):
