@@ -10,6 +10,7 @@ import os
 import json
 import cv2
 import shutil
+import torch
 from ultralytics import YOLO
 from angle_extractions import *
 from angle_extractions import model
@@ -161,6 +162,9 @@ while True:
                             if not os.path.isdir(user_vids_dir):
                                 os.mkdir(user_vids_dir)
 
+                            user_analysed_vids_dir = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-analysed_vids"
+                            if not os.path.isdir(user_analysed_vids_dir):
+                                os.mkdir(user_analysed_vids_dir)
 
                             try: 
                                 open(f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}Data", "x").close()
@@ -802,15 +806,19 @@ while True:
                     squatBtn = document.getElementById("squatBtn");
                     pullupBtn = document.getElementById("pullupBtn");
 
+                    localStorage.setItem("deadlift", "false");
+                    localStorage.setItem("squat", "false");
+                    localStorage.setItem("pullup", "false");
+                    localStorage.setItem("backToUpload", "false");
 
                     goBackBtn.addEventListener("click", () => {
-                              localStorage.setItem("backToUpload", "true")})
+                              localStorage.setItem("backToUpload", "true")});
                     deadliftBtn.addEventListener("click", () => {
-                              localStorage.setItem("deadlift", "true")})
+                              localStorage.setItem("deadlift", "true")});
                     squatBtn.addEventListener("click", () => {
-                              localStorage.setItem("squat", "true")})
+                              localStorage.setItem("squat", "true")});
                     pullupBtn.addEventListener("click", () => {
-                              localStorage.setItem("pullup", "true")})
+                              localStorage.setItem("pullup", "true")});
                 """)
         
         def checkDeadlift():
@@ -842,18 +850,58 @@ while True:
                         return os.path.join(root, file)
             return None
         
+        def find_yolo_save_count():
+            directory = f"/Users/raymondwu/codingprograms/trainer/website/database/{getUsername()}/{getUsername()}-analysed_vids"
+            if not os.path.exists(directory):
+                return 0  # Return 0 if the directory doesn't exist yet
+            num_items = len(os.listdir(directory))  # Counts both files and folders
+            return num_items
+        
+        def get_latest_file_by_number(folder_path, prefix):
+            max_number = -1
+            latest_file = None
+
+            for filename in os.listdir(folder_path):
+                if filename.startswith(prefix):
+                    name_part = filename[len(prefix):]  # Remove prefix
+                    dot_index = name_part.rfind('.')    # Find extension dot
+                    if dot_index != -1:
+                        number_str = name_part[:dot_index]
+                        if number_str.isdigit():
+                            number = int(number_str)
+                            if number > max_number:
+                                max_number = number
+                                latest_file = filename
+
+            if latest_file:
+                return os.path.join(folder_path, latest_file)
+            else:
+                return None
+
+        
         analyse_count_pullup = 0
         analyse_count_squat = 0
         analyse_count_deadlift = 0
-        
+        analysed = True
+
+        if torch.backends.mps.is_available() and torch.backends.mps.is_built():
+            device = torch.device("mps")
+            print("Using MPS (Apple GPU)")
+        else:
+            device = torch.device("cpu")
+            print("Using CPU")
+
         while True:
-            print("analysing")
             if checkPullup() == "true":
+                print("gothere")
+                driver.execute_script("""
+                    localStorage.setItem("pullup", "false");
+                                         """)
                 print("doing pullup")
                 video_name = driver.execute_script("""return localStorage.getItem("uploadedVideo")""").split(".") 
                 video_name = video_name[0]
                 video_name += "_use"
-                print(video_name)
+
                 video_path = find_file_by_name(f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-vids", video_name)
 
                 if video_path == None:
@@ -861,8 +909,28 @@ while True:
                 
                 else:
                     if analyse_count_pullup == 0:
+                        print("do feed")
+                        feedback = []
                         analyse_count_pullup += 1
-                        results = model.predict(video_path, show=False, save=False)
+                        save_dir = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-analysed_vids"
+                        results = model.predict(video_path, show=False, save=True, project=save_dir, device=device)
+                        predict_dir = os.path.join(save_dir, "predict")
+                        file_list = os.listdir(predict_dir)
+
+                        original_file = file_list[0]
+                        original_path = os.path.join(predict_dir, original_file)
+                        count = find_yolo_save_count()
+                        new_filename = f"analysed_video_{count}.mp4"
+                        new_path = os.path.join(save_dir, new_filename)
+
+                        with open(original_path, "rb") as src:
+                            with open(new_path, "wb") as dst:
+                                dst.write(src.read())
+
+
+                        for file in os.listdir(predict_dir):
+                            os.remove(os.path.join(predict_dir, file))
+                        os.rmdir(predict_dir)
 
                         x, y = get_coords_pullups(results)
                         nframes = len(results)
@@ -874,15 +942,49 @@ while True:
 
 
                         if not pullup_left_vs_right_all(left_angles, right_angles):
-                            print("make an even strength distribution")
-                            pass
+                            print("Make an even strength distribution between both arms.")
+                            feedback.append("Make an even strength distribution between both arms.")
+                        else:
+                            print("Good symmetry.")
+                            feedback.append("Good symmetry.")
 
                         if not check_ratio_pullups(left_angles):
-                            print("slow down eccentric")
-                            pass
+                            print("Slow down the negative/eccentric.")
+                            feedback.append("Slow down the negative/eccentric.")
+                        else:
+                            print("Good tempo.")
+                            feedback.append("Good tempo.")
+
+
+                    driver.execute_script(""" 
+                            exerciseSelectionSection = document.getElementById("exerciseSelectionSection");
+                            feedbackSection = document.getElementById("feedbackSection");
+                                        
+                            exerciseSelectionSection.classList.add("hidden");
+                            feedbackSection.classList.remove("hidden");
+
+                            """) # hide exerciseSelectionSection when clicking one of the options and show the feedback section
+
+                    if len(feedback) == 0:
+                        print("Error with appending feedback")
+                    else:
+                        for i in range(len(feedback)):
+                            driver.execute_script(f"""
+                            resultFeedback = document.getElementById("resultFeedback");
+                            feedbackP{i} = document.createElement("p");
+                            feedbackP{i}.setAttribute("id", "feedbackP{i}")
+                            feedbackP{i}.textContent = "{feedback[i]}"
+                            resultFeedback.appendChild(feedbackP{i});
+
+                            """)
+
+
 
             if checkSquat() == "true":
                 print("doing squat")
+                driver.execute_script("""
+                    localStorage.setItem("squat", "false");
+                                        """)
                 video_name = driver.execute_script("""return localStorage.getItem("uploadedVideo")""").split(".") 
                 video_name = video_name[0]
                 video_name += "_use"
@@ -894,8 +996,27 @@ while True:
                 
                 else:
                     if analyse_count_squat == 0:
+                        feedback = []
                         analyse_count_squat += 1
-                        results = model.predict(video_path, show=True, save=False)
+                        save_dir = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-analysed_vids"
+                        results = model.predict(video_path, show=False, save=True, project=save_dir, device=device)
+                        predict_dir = os.path.join(save_dir, "predict")
+                        file_list = os.listdir(predict_dir)
+
+                        original_file = file_list[0]
+                        original_path = os.path.join(predict_dir, original_file)
+                        count = find_yolo_save_count()
+                        new_filename = f"analysed_video_{count}.mp4"
+                        new_path = os.path.join(save_dir, new_filename)
+
+                        with open(original_path, "rb") as src:
+                            with open(new_path, "wb") as dst:
+                                dst.write(src.read())
+
+
+                        for file in os.listdir(predict_dir):
+                            os.remove(os.path.join(predict_dir, file))
+                        os.rmdir(predict_dir)
 
                         x, y = get_coords_squat(results)
                         nframes = len(results)
@@ -914,17 +1035,32 @@ while True:
                             start_con, stop_con = stop_ecc, start_ecc
 
                             if not check_all_squat_align(nframes, noses, leftShoulders, leftAnkles):
-                                print("Have shoulders/bar over midfoot for optimimal stability/bar path")
+                                print("Have shoulders/bar over midfoot for optimimal stability/bar path.")
+                                feedback.append("Have shoulders/bar over midfoot for optimimal stability/bar path.")
+                            else:
+                                print("Good stability/bar path.")
+                                feedback.append("Good stability/bar path.")
 
-                            if not check_all_bentover(nframes, leftShoulders, leftHips, leftAnkles):
-                                print("You are too bentover, be more upright during the motion")
-                        
+                            if not check_all_bentover(nframes, leftShoulders, leftHips, leftAnkles): # change bentover to be compared to the floor
+                                print("You are too bentover, be more upright during the motion.")
+                                feedback.append("You are too bentover, be more upright during the motion.")
+                            else:
+                                print(("Good torso angle."))
+                                feedback.append("Good torso angle.")
+
                             if not squat_depth_check(left_angles, stop_ecc):
-                                print("You need to squat deeper")
+                                print("You need to squat deeper.")
+                                feedback.append("You need to squat deeper.")
+                            else:
+                                print("Good squat depth.")
+                                feedback.append("Good squat depth.")
 
                             if not check_ratio_squats(left_angles):
-                                print("slow down eccentric")
-                                pass
+                                print("slow down eccentric.")
+                                feedback.append("slow down eccentric.")
+                            else:
+                                print("Good tempo.")
+                                feedback.append("Good tempo.")
                         
                         elif squat_direction == "right":
 
@@ -932,23 +1068,71 @@ while True:
                             start_con, stop_con = stop_ecc, start_ecc
 
                             if not check_all_squat_align(nframes, noses, rightShoulders, rightAnkles):
-                                print("Have shoulders/bar over midfoot for optimimal stability/bar path")
+                                print("Have shoulders/bar over midfoot for optimimal stability/bar path.")
+                                feedback.append("Have shoulders/bar over midfoot for optimimal stability/bar path.")
+                            else:
+                                print("Good stability/bar path.")
+                                feedback.append("Good stability/bar path.")
 
                             if not check_all_bentover(nframes, rightShoulders, rightHips, rightAnkles):
-                                print("You are too bentover, be more upright during the motion")
+                                print("You are too bentover, be more upright during the motion.")
+                                feedback.append("You are too bentover, be more upright during the motion.")
+                            else:
+                                print(("Good torso angle."))
+                                feedback.append("Good torso angle.")
 
                             if not squat_depth_check(right_angles, stop_ecc):
-                                print("You need to squat deeper")
+                                print("You need to squat deeper.")
+                                feedback.append("You need to squat deeper.")
+                            else:
+                                print("Good squat depth.")
+                                feedback.append("Good squat depth.")
 
                             if not check_ratio_squats(right_angles):
-                                print("slow down eccentric")
-                                pass
+                                print("slow down eccentric.")
+                                feedback.append("slow down eccentric.")
+                            else:
+                                print("Good tempo.")
+                                feedback.append("Good tempo.")
 
                         """if not check_all_kneecaves(nframes, leftKnees, rightKnees, leftAnkles, rightAnkles):
                             print("You are caving your knees in, have them facing the same direction as your feet")"""
+                
+                    driver.execute_script(""" 
+                            exerciseSelectionSection = document.getElementById("exerciseSelectionSection");
+                            feedbackSection = document.getElementById("feedbackSection");
+                                        
+                            exerciseSelectionSection.classList.add("hidden");
+                            feedbackSection.classList.remove("hidden");
+
+                            """) # hide exerciseSelectionSection when clicking one of the options and show the feedback section
+
+                    if len(feedback) == 0:
+                        print("Error with appending feedback")
+                    else:
+                        for i in range(len(feedback)):
+                            driver.execute_script(f"""
+                            resultFeedback = document.getElementById("resultFeedback");
+                            feedbackP{i} = document.createElement("p");
+                            feedbackP{i}.setAttribute("id", "feedbackP{i}")
+                            feedbackP{i}.textContent = "{feedback[i]}"
+                            resultFeedback.appendChild(feedbackP{i});
+
+                            """)
+
+                        vid_dir = get_latest_file_by_number(f"trainer/website/database/{getUsername()}/{getUsername()}-analysed_vids", "analysed_video_")
+                        driver.execute_script(f"""
+                            feedbackVideo = document.getElementById("feedbackVideo");
+                            feedbackVideo.src = "{vid_dir}"
+                            feedbackVideo.load();
+                            """)
+
                         
             if checkDeadlift() == "true":
                 print("doing deadlift")
+                driver.execute_script("""
+                    localStorage.setItem("deadlift", "false");
+                                        """)
                 video_name = driver.execute_script("""return localStorage.getItem("uploadedVideo")""").split(".") 
                 video_name = video_name[0]
                 video_name += "_use"
@@ -960,7 +1144,28 @@ while True:
                 
                 else:
                     if analyse_count_deadlift == 0:
+                        feedback = []
                         analyse_count_deadlift += 1
+                        save_dir = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-analysed_vids"
+                        results = model.predict(video_path, show=False, save=True, project=save_dir, device=device)
+                        predict_dir = os.path.join(save_dir, "predict")
+                        file_list = os.listdir(predict_dir)
+
+                        original_file = file_list[0]
+                        original_path = os.path.join(predict_dir, original_file)
+                        count = find_yolo_save_count()
+                        new_filename = f"analysed_video_{count}.mp4"
+                        new_path = os.path.join(save_dir, new_filename)
+
+                        with open(original_path, "rb") as src:
+                            with open(new_path, "wb") as dst:
+                                dst.write(src.read())
+
+
+                        for file in os.listdir(predict_dir):
+                            os.remove(os.path.join(predict_dir, file))
+                        os.rmdir(predict_dir)
+
                         x, y = get_coords_deadlift(results)
                         nframes = len(results)
                         leftShoulders, rightShoulders = get_shoulders_coords(nframes, x, y)
@@ -978,33 +1183,53 @@ while True:
 
                             result = check_all_ratios_deadlift(left_hip_angles, left_knee_angles)
                             if result == 1:
-                                print("Open torso slower, you are turning this into a stiff-leg deadlift, too much emphasis on back")
+                                print("Open torso slower, you are turning this into a stiff-leg deadlift, too much emphasis on back.")
+                                feedback.append("Open torso slower, you are turning this into a stiff-leg deadlift, too much emphasis on back.")
                             elif result == 2:
-                                print("Open torso faster, you are putting too much emphasis on your quads and knees")
+                                print("Open torso faster, you are putting too much emphasis on your quads and knees.")
+                                feedback.append("Open torso faster, you are putting too much emphasis on your quads and knees.")
                             else:
-                                print("Good form")
+                                print("Good form.")
+                                feedback.append("Good form.")
 
                             result = check_all_knees_deadlift(left_knee_angles)
                             if result == 1:
-                                print("Bend knees more")
+                                print("Open torso slower, you are turning this into a stiff-leg deadlift, too much emphasis on back.")
+                                feedback.append("Open torso slower, you are turning this into a stiff-leg deadlift, too much emphasis on back.")
                             elif result == 2:
-                                print("Straighten knees more")
+                                print("Open torso faster, you are putting too much emphasis on your quads and knees.")
+                                feedback.append("Open torso faster, you are putting too much emphasis on your quads and knees.")
                             else:
-                                print("Good form")
+                                print("Good form.")
+                                feedback.append("Good form.")
 
+                    driver.execute_script(""" 
+                            exerciseSelectionSection = document.getElementById("exerciseSelectionSection");
+                            feedbackSection = document.getElementById("feedbackSection");
+                                        
+                            exerciseSelectionSection.classList.add("hidden");
+                            feedbackSection.classList.remove("hidden");
 
+                            """) # hide exerciseSelectionSection when clicking one of the options and show the feedback section
+                    
+                    if len(feedback) == 0:
+                        print("Error with appending feedback")
+                    else:
+                        for i in range(len(feedback)):
+                            driver.execute_script(f"""
+                            resultFeedback = document.getElementById("resultFeedback");
+                            feedbackP = document.createElement("p")
+                            feedbackP.textContent = "{feedback[i]}"
+                            resultFeedback.appendChild(feedbackP);
 
+                            """)
 
             if checkGoBack() == "true":
                 break
 
-
-
-
-
-
-
-        
+        while True:
+            print("asdasd")
+            pass
 
 
             

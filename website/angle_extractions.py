@@ -436,8 +436,8 @@ def pullup_left_vs_right_all(left_angles, right_angles): # ASSUMING STRAIGHT ON 
 
 
 model = YOLO("yolo11n-pose.pt") # n/x, n = nano, x = more complex
-
-#results = model.predict(source="/Users/raymondwu/codingprograms/trainer/website/database/raymond/raymond-vids/perfect squat_use.mov", show=True, save=False)
+#device = "mps"
+#results = model.predict(source="/Users/raymondwu/codingprograms/trainer/website/database/raymond/raymond-vids/perfect squat_use.mov", show=True, save=False, device=device, vid_stride=4, max_det=1)
 
 """#keypoints shape: [2, 17, 3], 3 --> [x,y,confidence]
 #print(results[0].keypoints.shape) # 5-10, shoulder to elbow to wrist, left right 

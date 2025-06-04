@@ -16,11 +16,24 @@
     </div>
 
     <div id="cardSection">
-      <h3>Select the exercise</h3>
-      <div id="exerciseBtns"></div>
-        <button id="deadliftBtn">Deadlift</button>
-        <button id="squatBtn">Squat</button>
-        <button id="pullupBtn">Pullup</button>
+
+      <div id="feedbackSection" class="hidden">
+        <div id="resultVideo">
+          <div id="thumbnailContainer">
+            <video id="feedbackVideo" muted></video>
+          </div>
+        </div>
+        <div id="resultFeedback">
+        </div>
+      </div>
+
+      <div id="exerciseSelectionSection">
+        <h3 id="statusText">Select the exercise</h3>
+        <div id="exerciseBtns"></div>
+          <button id="deadliftBtn">Deadlift</button>
+          <button id="squatBtn">Squat</button>
+          <button id="pullupBtn">Pullup</button>
+        </div>
       </div>
       <button id="goBackBtn">← Go Back</button>
     </div>
