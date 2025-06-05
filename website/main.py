@@ -880,32 +880,33 @@ while True:
             else:
                 return None
         
+
         def convert_and_overwrite(input_path):
-            # Create a temp file in the same directory
+            # Create a temporary output path
             temp_output = input_path + ".temp.mp4"
 
-            # FFmpeg command
+            # FFmpeg command with ultrafast preset and audio disabled
             command = [
                 "ffmpeg",
                 "-i", input_path,
                 "-c:v", "libx264",
-                "-c:a", "aac",
-                "-movflags", "+faststart",
-                "-y",  # Overwrite output file without asking
+                "-preset", "ultrafast",     # ✅ Fastest encoding
+                "-an",                      # ✅ Disable audio
+                "-movflags", "+faststart", # ✅ Enable streaming-friendly playback
+                "-y",                       # ✅ Overwrite output file
                 temp_output
             ]
 
             try:
+                print("⏳ Converting video (audio disabled)...")
                 subprocess.run(command, check=True)
-
-                # Replace the original file with the converted one
                 os.replace(temp_output, input_path)
                 print("✅ Original video overwritten with re-encoded version.")
-
             except subprocess.CalledProcessError as e:
-                print("FFmpeg conversion failed:", e)
+                print("❌ FFmpeg conversion failed:", e)
                 if os.path.exists(temp_output):
                     os.remove(temp_output)
+
 
         
         analyse_count_pullup = 0
@@ -1150,8 +1151,8 @@ while True:
                             """)
 
                         vid_dir = get_latest_file_by_number(f"/Users/raymondwu/codingprograms/trainer/website/database/{getUsername()}/{getUsername()}-analysed_vids", "analysed_video_")
-                        #convert_and_overwrite(vid_dir)
-                        vid_dir = "/Users/raymondwu/codingprograms/trainer/website/database/raymond/raymond-analysed_vids/analysed_video_2.mp4"
+                        convert_and_overwrite(vid_dir)
+                        vid_dir = vid_dir.split("/Users/raymondwu/codingprograms/trainer/website/database/")[1]
                         print("gothere")
                         driver.execute_script(f"""
                             feedbackVideo = document.getElementById("feedbackVideo");
