@@ -175,3 +175,11 @@ button:hover {
 .hidden{
     display: none;
 }
+
+#feedbackVideo{
+    border-radius: 15px;
+}
+
+#feedbackSection{
+    text-align: center;
+}

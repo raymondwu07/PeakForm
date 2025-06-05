@@ -11,6 +11,8 @@ import json
 import cv2
 import shutil
 import torch
+import subprocess
+import tempfile
 from ultralytics import YOLO
 from angle_extractions import *
 from angle_extractions import model
@@ -877,6 +879,33 @@ while True:
                 return os.path.join(folder_path, latest_file)
             else:
                 return None
+        
+        def convert_and_overwrite(input_path):
+            # Create a temp file in the same directory
+            temp_output = input_path + ".temp.mp4"
+
+            # FFmpeg command
+            command = [
+                "ffmpeg",
+                "-i", input_path,
+                "-c:v", "libx264",
+                "-c:a", "aac",
+                "-movflags", "+faststart",
+                "-y",  # Overwrite output file without asking
+                temp_output
+            ]
+
+            try:
+                subprocess.run(command, check=True)
+
+                # Replace the original file with the converted one
+                os.replace(temp_output, input_path)
+                print("✅ Original video overwritten with re-encoded version.")
+
+            except subprocess.CalledProcessError as e:
+                print("FFmpeg conversion failed:", e)
+                if os.path.exists(temp_output):
+                    os.remove(temp_output)
 
         
         analyse_count_pullup = 0
@@ -1120,11 +1149,16 @@ while True:
 
                             """)
 
-                        vid_dir = get_latest_file_by_number(f"trainer/website/database/{getUsername()}/{getUsername()}-analysed_vids", "analysed_video_")
+                        vid_dir = get_latest_file_by_number(f"/Users/raymondwu/codingprograms/trainer/website/database/{getUsername()}/{getUsername()}-analysed_vids", "analysed_video_")
+                        #convert_and_overwrite(vid_dir)
+                        vid_dir = "/Users/raymondwu/codingprograms/trainer/website/database/raymond/raymond-analysed_vids/analysed_video_2.mp4"
+                        print("gothere")
                         driver.execute_script(f"""
                             feedbackVideo = document.getElementById("feedbackVideo");
-                            feedbackVideo.src = "{vid_dir}"
+                            feedbackVideo.src = "{vid_dir}";
+                            feedbackVideo.style.display = "block";
                             feedbackVideo.load();
+
                             """)
 
                         
