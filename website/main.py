@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait 
 from selenium.webdriver.support import expected_conditions as EC
 import time
+from time import sleep
 import datetime
 import os
 import json
@@ -16,6 +17,7 @@ import tempfile
 from ultralytics import YOLO
 from angle_extractions import *
 from angle_extractions import model
+from selenium.webdriver import ChromeOptions
 
 options = webdriver.ChromeOptions()
 options.add_argument("--incognito")
@@ -859,7 +861,7 @@ while True:
             num_items = len(os.listdir(directory))  # Counts both files and folders
             return num_items
         
-        def get_latest_file_by_number(folder_path, prefix):
+        """def get_latest_file_by_number(folder_path, prefix):
             max_number = -1
             latest_file = None
 
@@ -878,10 +880,10 @@ while True:
             if latest_file:
                 return os.path.join(folder_path, latest_file)
             else:
-                return None
+                return None """
         
 
-        def convert_and_overwrite(input_path):
+        """ def convert_and_overwrite(input_path):
             # Create a temporary output path
             temp_output = input_path + ".temp.mp4"
 
@@ -898,14 +900,12 @@ while True:
             ]
 
             try:
-                print("⏳ Converting video (audio disabled)...")
                 subprocess.run(command, check=True)
                 os.replace(temp_output, input_path)
-                print("✅ Original video overwritten with re-encoded version.")
             except subprocess.CalledProcessError as e:
                 print("❌ FFmpeg conversion failed:", e)
                 if os.path.exists(temp_output):
-                    os.remove(temp_output)
+                    os.remove(temp_output) """
 
 
         
@@ -919,7 +919,7 @@ while True:
             print("Using MPS (Apple GPU)")
         else:
             device = torch.device("cpu")
-            print("Using CPU")
+            print("Using CU")
 
         while True:
             if checkPullup() == "true":
@@ -939,7 +939,6 @@ while True:
                 
                 else:
                     if analyse_count_pullup == 0:
-                        print("do feed")
                         feedback = []
                         analyse_count_pullup += 1
                         save_dir = f"/Users/raymondwu/codingprograms/trainer/website/database/{str(getUsername())}/{str(getUsername())}-analysed_vids"
@@ -1007,6 +1006,21 @@ while True:
                             resultFeedback.appendChild(feedbackP{i});
 
                             """)
+
+                        """vid_dir = get_latest_file_by_number(f"/Users/raymondwu/codingprograms/trainer/website/database/{getUsername()}/{getUsername()}-analysed_vids", "analysed_video_")
+                        convert_and_overwrite(vid_dir)
+                        vid_dir = vid_dir.split("/Users/raymondwu/codingprograms/trainer/website/database/")[1]
+                        print("gothere") """
+                        #driver.execute_script(f"""
+                            #feedbackVideo = document.getElementById("feedbackVideo");
+                            #feedbackVideo.src = "{vid_dir}";
+                            #feedbackVideo.style.display = "block";
+                            #feedbackVideo.load();
+
+                            #""") 
+
+
+                                                
 
 
 
@@ -1150,18 +1164,18 @@ while True:
 
                             """)
 
-                        vid_dir = get_latest_file_by_number(f"/Users/raymondwu/codingprograms/trainer/website/database/{getUsername()}/{getUsername()}-analysed_vids", "analysed_video_")
+                        """vid_dir = get_latest_file_by_number(f"/Users/raymondwu/codingprograms/trainer/website/database/{getUsername()}/{getUsername()}-analysed_vids", "analysed_video_")
                         convert_and_overwrite(vid_dir)
                         vid_dir = vid_dir.split("/Users/raymondwu/codingprograms/trainer/website/database/")[1]
-                        print("gothere")
-                        driver.execute_script(f"""
-                            feedbackVideo = document.getElementById("feedbackVideo");
-                            feedbackVideo.src = "{vid_dir}";
-                            feedbackVideo.style.display = "block";
-                            feedbackVideo.load();
+                        print("gothere") """
+                        #driver.execute_script(f"""
+                            #feedbackVideo = document.getElementById("feedbackVideo");
+                            #feedbackVideo.src = "{vid_dir}";
+                            #feedbackVideo.style.display = "block";
+                            #feedbackVideo.load();
 
-                            """)
-
+                            #""") 
+                        
                         
             if checkDeadlift() == "true":
                 print("doing deadlift")
@@ -1261,11 +1275,3 @@ while True:
 
             if checkGoBack() == "true":
                 break
-
-        while True:
-            print("asdasd")
-            pass
-
-
-            
-

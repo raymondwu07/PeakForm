@@ -23,11 +23,11 @@ def get_average_ratio(start, stop, angles): # calculates average ratio across al
     return (average/count)
 
 def ecc_vs_con_pullup(con_ratio, ecc_ratio): # checks difference between concentric and eccentric ratio - if too eccentric changes too fast then return false
-    print(ecc_ratio, con_ratio)
+    #print(ecc_ratio, con_ratio)
     return ecc_ratio > 0.96*con_ratio
 
 def ecc_vs_con_squat(con_ratio, ecc_ratio): # checks difference between concentric and eccentric ratio - if too eccentric changes too fast then return false
-    print(ecc_ratio, con_ratio)
+    #print(ecc_ratio, con_ratio)
     return ecc_ratio > 0.99*con_ratio
     
 def pullup_left_vs_right(leftAngle, rightAngle): # if one side's angle open is much different the return false
